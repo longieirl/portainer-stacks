@@ -13,6 +13,6 @@ services:
       - DOCKER_MODS=ghcr.io/gilbn/theme.park:qbittorrent
       - TP_THEME=space-gray
     volumes:
-      - ${HOME}/Documents/docker/data/torrent/config:/config
-      - ${HOME}/Documents/docker/data/torrent/downloads:/downloads
+      - ${DOCKER_DATA_HOME}/torrent/config:/config
+      - ${DOCKER_DATA_HOME}/torrent/downloads:/downloads
     restart: unless-stopped

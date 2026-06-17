@@ -9,8 +9,8 @@ services:
       - TZ=Europe/Dublin
       - DELUGE_LOGLEVEL=info # optional
     volumes:
-      - ${HOME}/Documents/docker/data/deluge/config:/config
-      - ${HOME}/Documents/docker/shared/downloads:/downloads
+      - ${DOCKER_DATA_HOME}/deluge/config:/config
+      - ${DOCKER_SHARED_HOME}/downloads:/downloads
     # ports:
     #   - 8112:8112
     restart: unless-stopped

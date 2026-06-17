@@ -32,10 +32,11 @@ Stack folder name is uppercased with hyphens replaced by underscores:
 
 ## Environment variables (host machine)
 
-All volume paths in compose files use `${DOCKER_DATA_HOME}`. Set this in `~/.zshrc`:
+All volume paths in compose files use two env vars. Add both to `~/.zshrc`:
 
 ```bash
 export DOCKER_DATA_HOME="${HOME}/Documents/docker/data"
+export DOCKER_SHARED_HOME="${HOME}/Documents/docker/shared"
 ```
 
 ## Starting Portainer

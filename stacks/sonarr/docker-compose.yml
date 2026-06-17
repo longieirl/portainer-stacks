@@ -7,8 +7,8 @@ services:
       - PGID=1000
       - TZ=Europe/Dublin
     volumes:
-      - ${HOME}/Documents/docker/data/sonarr/config:/config
-      - ${HOME}/Documents/docker/shared/downloads:/downloads
+      - ${DOCKER_DATA_HOME}/sonarr/config:/config
+      - ${DOCKER_SHARED_HOME}/downloads:/downloads
     ports:
       - 8989:8989
     restart: unless-stopped
