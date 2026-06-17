@@ -1,4 +1,3 @@
-version: "3.7"
 services:
   deluge:
     network_mode: "container:gluetun"
