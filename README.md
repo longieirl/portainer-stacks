@@ -8,16 +8,21 @@ GitOps-managed Docker Compose stacks for Portainer.
 - Push to `main` → GitHub Actions fires Portainer webhook for changed stacks
 - Watchtower pulls updated images nightly at 4am
 
-## Adding a new stack
+## Wiring a stack to GitOps in Portainer
 
-1. Create `stacks/<stack-name>/docker-compose.yml`
-2. Create `stacks/<stack-name>/.env.example` documenting all required vars
-3. In Portainer: create stack → Git repository → point at this repo
-4. Copy the Portainer webhook URL
-5. Add GitHub Actions secret: `PORTAINER_WEBHOOK_<STACKNAME>` (uppercase, hyphens → underscores)
-6. In `.github/workflows/deploy.yml`, add to the `env:` block:
-   `PORTAINER_WEBHOOK_<STACKNAME>: ${{ secrets.PORTAINER_WEBHOOK_<STACKNAME> }}`
-7. In Portainer: set real env var values under the stack's Environment Variables tab
+Delete the existing stack, then Stacks → **+ Add stack** → **Repository**:
+
+| Field | Value |
+|---|---|
+| Repository URL | `https://github.com/longieirl/portainer-stacks.git` |
+| Branch | `main` |
+| Compose path | `stacks/<stack-name>/docker-compose.yml` |
+| Authentication | Username + PAT |
+| Username | `longieirl` |
+| Token | github.com PAT with `repo` scope (starts with `ghp_` or `github_pat_`) |
+| GitOps updates mechanism | **Webhook** (not Polling) |
+
+After deploy, copy the webhook URL from the stack page → store as GitHub Actions secret `PORTAINER_WEBHOOK_<STACKNAME>`.
 
 ## Secrets
 
