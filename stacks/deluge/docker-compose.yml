@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  deluge:
+    network_mode: "container:gluetun"
+    image: lscr.io/linuxserver/deluge:latest
+    container_name: deluge
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+      - DELUGE_LOGLEVEL=info # optional
+    volumes:
+      - /Users/longie/Documents/docker/data/deluge/config:/config
+      - /Users/longie/Documents/docker/shared/downloads:/downloads
+    # ports:
+    #   - 8112:8112
+    restart: unless-stopped
