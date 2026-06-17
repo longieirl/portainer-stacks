@@ -19,8 +19,8 @@ services:
       - SERVER_CITIES=New York
       - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/24
     volumes:
-      - /Users/longie/Documents/docker/data/gluetun:/gluetun
-      - /Users/longie/Documents/docker/data/port_forward:/tmp/gluetun/forwarded_port
+      - ${HOME}/Documents/docker/data/gluetun:/gluetun
+      - ${HOME}/Documents/docker/data/port_forward:/tmp/gluetun/forwarded_port
     ports:
       - 3020:8000/tcp   # Built-in HTTP control server
       - 8080:8080       # QB
