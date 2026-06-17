@@ -1,26 +1,28 @@
-name: Deploy changed stacks
+name: Validate changed stacks
 
 on:
   push:
     branches: [main]
     paths:
       - 'stacks/**'
+  pull_request:
+    paths:
+      - 'stacks/**'
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Detect changed stacks and trigger webhooks
+      - name: Detect and validate changed stacks
         run: |
           if git rev-parse --verify HEAD~1 > /dev/null 2>&1; then
             changed=$(git diff --name-only HEAD~1 HEAD -- stacks/ \
               | cut -d/ -f2 | sort -u)
           else
-            # First commit — treat all stacks as changed
             changed=$(git ls-tree --name-only HEAD -- stacks/ | sort -u)
           fi
 
@@ -31,27 +33,17 @@ jobs:
 
           failed=0
           for stack in $changed; do
-            secret_name="PORTAINER_WEBHOOK_$(echo "$stack" | tr '[:lower:]-' '[:upper:]_')"
-            url=$(printenv "$secret_name" || true)
-            if [ -z "$url" ]; then
-              echo "WARNING: No webhook secret found for $stack (expected $secret_name) — skipping"
+            compose="stacks/$stack/docker-compose.yml"
+            if [ ! -f "$compose" ]; then
+              echo "WARNING: $compose not found — skipping"
               continue
             fi
-            echo "Triggering deploy for: $stack"
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 --connect-timeout 10 -X POST "$url")
-            if [ "$http_code" != "200" ] && [ "$http_code" != "204" ]; then
-              echo "ERROR: Webhook for $stack returned HTTP $http_code"
+            echo "Validating $compose"
+            if ! docker compose -f "$compose" config --quiet 2>&1; then
+              echo "ERROR: $compose failed validation"
               failed=1
-              continue
+            else
+              echo "$stack OK"
             fi
-            echo "$stack deploy triggered OK (HTTP $http_code)"
           done
           exit ${failed:-0}
-        env:
-          PORTAINER_WEBHOOK_WATCHTOWER: ${{ secrets.PORTAINER_WEBHOOK_WATCHTOWER }}
-          PORTAINER_WEBHOOK_DELUGE: ${{ secrets.PORTAINER_WEBHOOK_DELUGE }}
-          PORTAINER_WEBHOOK_JACKETT: ${{ secrets.PORTAINER_WEBHOOK_JACKETT }}
-          PORTAINER_WEBHOOK_N8N: ${{ secrets.PORTAINER_WEBHOOK_N8N }}
-          PORTAINER_WEBHOOK_SONARR: ${{ secrets.PORTAINER_WEBHOOK_SONARR }}
-          PORTAINER_WEBHOOK_QBITTORRENT: ${{ secrets.PORTAINER_WEBHOOK_QBITTORRENT }}
-          PORTAINER_WEBHOOK_GLUETUN: ${{ secrets.PORTAINER_WEBHOOK_GLUETUN }}
