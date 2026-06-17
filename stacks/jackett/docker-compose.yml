@@ -1,0 +1,17 @@
+version: "2.1"
+services:
+  jackett:
+    image: lscr.io/linuxserver/jackett:latest
+    network_mode: "container:gluetun"
+    container_name: jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+      - AUTO_UPDATE=true #optional
+    volumes:
+      - /Users/longie/Documents/docker/data/jackett/config:/config
+      - /Users/longie/Documents/docker/shared/downloads:/downloads
+    # ports:
+    #   - 9117:9117
+    restart: unless-stopped
