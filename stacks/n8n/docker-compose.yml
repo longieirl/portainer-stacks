@@ -40,6 +40,7 @@ services:
       DB_POSTGRESDB_DATABASE: "n8n"
       DB_POSTGRESDB_USER: "n8n"
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
     volumes:
       - ${HOME}/Documents/docker/data/n8n_data:/home/node/.n8n
     networks:
