@@ -10,7 +10,7 @@ GitOps-managed Docker Compose stacks for Portainer.
 - Watchtower pulls updated images nightly at 4am
 
 > **Why polling, not webhooks?**
-> Portainer runs on a private LAN (`192.168.1.6`). GitHub Actions runners are hosted externally (Azure) and cannot reach private IP addresses. Webhook calls time out with exit code 28. Polling is the correct mechanism for a locally-hosted Portainer instance.
+> Portainer runs on a private LAN (`192.168.1.6`). GitHub Actions runners are hosted externally (Azure) and cannot reach private IP addresses. Webhook calls time out with exit code 28. Polling works for now. More advanced options (Cloudflare Tunnel, self-hosted runner, port forwarding + DDNS) would enable webhook-based instant deploys if needed later.
 
 ---
 
