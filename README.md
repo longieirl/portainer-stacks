@@ -2,6 +2,8 @@
 
 GitOps-managed Docker Compose stacks for Portainer.
 
+> Inspired by [self-hosted-cookbook](https://github.com/tborychowski/self-hosted-cookbook) — a great reference for discovering and configuring self-hosted Docker Compose services.
+
 ## How it works
 
 - Each stack lives in `stacks/<stack-name>/docker-compose.yml`
