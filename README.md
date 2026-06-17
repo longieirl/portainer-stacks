@@ -5,66 +5,33 @@ GitOps-managed Docker Compose stacks for Portainer.
 ## How it works
 
 - Each stack lives in `stacks/<stack-name>/docker-compose.yml`
-- Push to `main` → GitHub Actions fires Portainer webhook for changed stacks
+- Push to `main` → GitHub Actions validates compose syntax for changed stacks
+- Portainer polls this repo every 24h and redeploys any stack whose compose file changed
 - Watchtower pulls updated images nightly at 4am
 
-## Wiring a stack to GitOps in Portainer
+> **Why polling, not webhooks?**
+> Portainer runs on a private LAN (`192.168.1.6`). GitHub Actions runners are hosted externally (Azure) and cannot reach private IP addresses. Webhook calls time out with exit code 28. Polling is the correct mechanism for a locally-hosted Portainer instance.
 
-Delete the existing stack, then Stacks → **+ Add stack** → **Repository**:
+---
 
-| Field | Value |
-|---|---|
-| Repository URL | `https://github.com/longieirl/portainer-stacks.git` |
-| Branch | `main` |
-| Compose path | `stacks/<stack-name>/docker-compose.yml` |
-| Authentication | Username + PAT |
-| Username | `longieirl` |
-| Token | github.com PAT with `repo` scope (starts with `ghp_` or `github_pat_`) |
-| GitOps updates mechanism | **Webhook** (not Polling) |
+## New developer setup checklist
 
-After deploy, copy the webhook URL from the stack page → store as GitHub Actions secret `PORTAINER_WEBHOOK_<STACKNAME>`.
+### 1. Host machine env vars
 
-## Secrets
-
-Never commit `.env` files. Real values live in Portainer's Environment Variables UI only.
-See `.env.example` in each stack folder for required variables.
-
-## Stack folder → GitHub Actions secret name mapping
-
-Stack folder name is uppercased with hyphens replaced by underscores:
-- `my-app` → `PORTAINER_WEBHOOK_MY_APP`
-- `traefik` → `PORTAINER_WEBHOOK_TRAEFIK`
-
-## Environment variables (host machine)
-
-All volume paths in compose files use two env vars. Add both to `~/.zshrc`:
+Add to `~/.zshrc` (or run `bash scripts/setup-env.sh`):
 
 ```bash
 export DOCKER_DATA_HOME="${HOME}/Documents/docker/data"
 export DOCKER_SHARED_HOME="${HOME}/Documents/docker/shared"
 ```
 
-Or run the setup script: `bash scripts/setup-env.sh`
+Create directories:
 
-## Portainer stack environment variables
+```bash
+mkdir -p "${DOCKER_DATA_HOME}" "${DOCKER_SHARED_HOME}"
+```
 
-Portainer CE has no global env var injection — vars must be set **per stack** in the UI.
-
-When wiring any stack via GitOps (Stacks → stack name → Editor → Environment variables), always add:
-
-| Variable | Value |
-|---|---|
-| `DOCKER_DATA_HOME` | `/Users/longie/Documents/docker/data` |
-| `DOCKER_SHARED_HOME` | `/Users/longie/Documents/docker/shared` |
-
-Stacks that also need secrets:
-
-| Stack | Additional vars |
-|---|---|
-| `gluetun` | `WIREGUARD_PRIVATE_KEY` |
-| `n8n` | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY` |
-
-## Starting Portainer
+### 2. Start Portainer
 
 Portainer is not managed as a stack — run it directly:
 
@@ -80,3 +47,76 @@ docker run -d \
   portainer/portainer-ce:latest
 ```
 
+Access at `https://localhost:9443`.
+
+### 3. Wire each stack to GitOps in Portainer
+
+Delete the existing stack, then Stacks → **+ Add stack** → **Repository**:
+
+| Field | Value |
+|---|---|
+| Repository URL | `https://github.com/longieirl/portainer-stacks.git` |
+| Branch | `main` |
+| Compose path | `stacks/<stack-name>/docker-compose.yml` |
+| Authentication | Username + PAT |
+| Username | `longieirl` |
+| Token | github.com PAT with `repo` scope (starts with `ghp_` or `github_pat_`) |
+| GitOps updates mechanism | **Polling** (NOT Webhook — see note above) |
+| Polling interval | `86400` seconds (24h) |
+| Re-pull image | OFF (Watchtower handles image updates) |
+
+After saving, confirm the stack shows "GitOps updates: Polling" on the stack page.
+
+### 4. Set environment variables per stack in Portainer UI
+
+Portainer CE has no global env var injection — vars must be set **per stack** in the UI.
+
+Stacks → stack name → Editor → Environment variables tab, add:
+
+| Variable | Value |
+|---|---|
+| `DOCKER_DATA_HOME` | `/Users/longie/Documents/docker/data` |
+| `DOCKER_SHARED_HOME` | `/Users/longie/Documents/docker/shared` |
+
+Stacks that also need secrets:
+
+| Stack | Additional vars |
+|---|---|
+| `gluetun` | `WIREGUARD_PRIVATE_KEY` |
+| `n8n` | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY` |
+
+### 5. Verify end-to-end
+
+- [ ] All 7 stacks running in Portainer: gluetun, deluge, jackett, qbittorrent, sonarr, n8n, watchtower
+- [ ] Each stack shows GitOps source pointing to this repo
+- [ ] Each stack has polling set to 86400s
+- [ ] `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` set in each stack's Environment Variables tab
+- [ ] gluetun, n8n have their secret vars set
+- [ ] Push a trivial change to any stack → GitHub Actions "Validate changed stacks" passes (green)
+- [ ] Wait for or manually trigger a Portainer poll → stack redeploys from git
+
+---
+
+## Stack dependency order
+
+gluetun **must be running** before starting deluge, jackett, or qbittorrent — all three use `network_mode: container:gluetun`.
+
+---
+
+## Secrets
+
+Never commit `.env` files. Real values live in Portainer's Environment Variables UI only.
+See `.env.example` in each stack folder for required variables.
+
+---
+
+## Environment variables (host machine)
+
+All volume paths in compose files use two env vars. Add both to `~/.zshrc`:
+
+```bash
+export DOCKER_DATA_HOME="${HOME}/Documents/docker/data"
+export DOCKER_SHARED_HOME="${HOME}/Documents/docker/shared"
+```
+
+Or run the setup script: `bash scripts/setup-env.sh`
