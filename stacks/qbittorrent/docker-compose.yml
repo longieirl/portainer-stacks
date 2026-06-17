@@ -14,5 +14,5 @@ services:
       - TP_THEME=space-gray
     volumes:
       - ${DOCKER_DATA_HOME}/torrent/config:/config
-      - ${DOCKER_DATA_HOME}/torrent/downloads:/downloads
+      - ${DOCKER_SHARED_HOME}/qtorrents:/downloads
     restart: unless-stopped
