@@ -8,8 +8,8 @@ services:
       - PGID=1000
       - TZ=Europe/Dublin
     volumes:
-      - /Users/longie/Documents/docker/data/sonarr/config:/config
-      - /Users/longie/Documents/docker/shared/downloads:/downloads
+      - ${HOME}/Documents/docker/data/sonarr/config:/config
+      - ${HOME}/Documents/docker/shared/downloads:/downloads
     ports:
       - 8989:8989
     restart: unless-stopped

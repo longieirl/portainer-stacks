@@ -28,8 +28,8 @@ services:
       - DOCKER_MODS=ghcr.io/gilbn/theme.park:qbittorrent
       - TP_THEME=space-gray
     volumes:
-      - /Users/longie/Documents/docker/data/torrent/config:/config
-      - /Users/longie/Documents/docker/data/torrent/downloads:/downloads
+      - ${HOME}/Documents/docker/data/torrent/config:/config
+      - ${HOME}/Documents/docker/data/torrent/downloads:/downloads
     #ports:
       #- 6881:6881
       #- 6881:6881/udp

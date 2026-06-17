@@ -10,8 +10,8 @@ services:
       - TZ=Europe/Dublin
       - AUTO_UPDATE=true #optional
     volumes:
-      - /Users/longie/Documents/docker/data/jackett/config:/config
-      - /Users/longie/Documents/docker/shared/downloads:/downloads
+      - ${HOME}/Documents/docker/data/jackett/config:/config
+      - ${HOME}/Documents/docker/shared/downloads:/downloads
     # ports:
     #   - 9117:9117
     restart: unless-stopped

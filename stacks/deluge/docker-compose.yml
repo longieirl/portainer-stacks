@@ -10,8 +10,8 @@ services:
       - TZ=Europe/Dublin
       - DELUGE_LOGLEVEL=info # optional
     volumes:
-      - /Users/longie/Documents/docker/data/deluge/config:/config
-      - /Users/longie/Documents/docker/shared/downloads:/downloads
+      - ${HOME}/Documents/docker/data/deluge/config:/config
+      - ${HOME}/Documents/docker/shared/downloads:/downloads
     # ports:
     #   - 8112:8112
     restart: unless-stopped
