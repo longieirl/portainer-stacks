@@ -49,4 +49,9 @@ jobs:
           exit ${failed:-0}
         env:
           PORTAINER_WEBHOOK_WATCHTOWER: ${{ secrets.PORTAINER_WEBHOOK_WATCHTOWER }}
-          # Add one line per stack — see README for naming convention
+          PORTAINER_WEBHOOK_DELUGE: ${{ secrets.PORTAINER_WEBHOOK_DELUGE }}
+          PORTAINER_WEBHOOK_JACKETT: ${{ secrets.PORTAINER_WEBHOOK_JACKETT }}
+          PORTAINER_WEBHOOK_N8N: ${{ secrets.PORTAINER_WEBHOOK_N8N }}
+          PORTAINER_WEBHOOK_SONARR: ${{ secrets.PORTAINER_WEBHOOK_SONARR }}
+          PORTAINER_WEBHOOK_QBITTORRENT: ${{ secrets.PORTAINER_WEBHOOK_QBITTORRENT }}
+          PORTAINER_WEBHOOK_GLUETUN: ${{ secrets.PORTAINER_WEBHOOK_GLUETUN }}
