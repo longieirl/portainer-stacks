@@ -39,6 +39,26 @@ export DOCKER_DATA_HOME="${HOME}/Documents/docker/data"
 export DOCKER_SHARED_HOME="${HOME}/Documents/docker/shared"
 ```
 
+Or run the setup script: `bash scripts/setup-env.sh`
+
+## Portainer stack environment variables
+
+Portainer CE has no global env var injection — vars must be set **per stack** in the UI.
+
+When wiring any stack via GitOps (Stacks → stack name → Editor → Environment variables), always add:
+
+| Variable | Value |
+|---|---|
+| `DOCKER_DATA_HOME` | `/Users/longie/Documents/docker/data` |
+| `DOCKER_SHARED_HOME` | `/Users/longie/Documents/docker/shared` |
+
+Stacks that also need secrets:
+
+| Stack | Additional vars |
+|---|---|
+| `gluetun` | `WIREGUARD_PRIVATE_KEY` |
+| `n8n` | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY` |
+
 ## Starting Portainer
 
 Portainer is not managed as a stack — run it directly:
