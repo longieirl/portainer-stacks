@@ -62,7 +62,7 @@ Delete the existing stack, then Stacks → **+ Add stack** → **Repository**:
 | Username | `longieirl` |
 | Token | github.com PAT with `repo` scope (starts with `ghp_` or `github_pat_`) |
 | GitOps updates mechanism | **Polling** (NOT Webhook — see note above) |
-| Polling interval | `86400` seconds (24h) |
+| Polling interval | `24h` |
 | Re-pull image | OFF (Watchtower handles image updates) |
 
 After saving, confirm the stack shows "GitOps updates: Polling" on the stack page.
@@ -89,7 +89,7 @@ Stacks that also need secrets:
 
 - [ ] All 7 stacks running in Portainer: gluetun, deluge, jackett, qbittorrent, sonarr, n8n, watchtower
 - [ ] Each stack shows GitOps source pointing to this repo
-- [ ] Each stack has polling set to 86400s
+- [ ] Each stack has polling set to 24h
 - [ ] `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` set in each stack's Environment Variables tab
 - [ ] gluetun, n8n have their secret vars set
 - [ ] Push a trivial change to any stack → GitHub Actions "Validate changed stacks" passes (green)
