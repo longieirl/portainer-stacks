@@ -31,5 +31,5 @@ services:
       - 6881:6881       # QB
       - 6881:6881/udp   # QB
       - 9117:9117       # Jackett
-      - 8191:8191       # Flare
+
       - 58846:58846     # Deluge
