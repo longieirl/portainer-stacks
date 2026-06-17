@@ -1,0 +1,38 @@
+version: "3.7"
+services:
+  qbittorrent:
+    network_mode: "container:gluetun"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=1
+    image: dyonr/qbittorrentvpn:latest
+    container_name: qbittorrent
+    privileged: true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+      - UMASK=022
+      - LAN_NETWORK=192.168.1.0/24
+      - VPN_ENABLED=no
+      - VPN_LAN_NETWORK=192.168.1.0/24
+      - VPN_TYPE=openvpn
+      - WEBUI_PORT=8080
+      - INCOMING_PORT=8999
+      - NAME_SERVERS=8.8.8.8,8.8.4.4,1.1.1.1
+      - WEBUI_PORT_ENV=8080
+      - DOCKER_MODS=ghcr.io/gilbn/theme.park:qbittorrent
+      - TP_THEME=space-gray
+    volumes:
+      - /Users/longie/Documents/docker/data/torrent/config:/config
+      - /Users/longie/Documents/docker/data/torrent/downloads:/downloads
+    #ports:
+      #- 6881:6881
+      #- 6881:6881/udp
+      #- 8999:8999
+      #- 8080:8080
+    restart: unless-stopped
