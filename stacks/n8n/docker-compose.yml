@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: n8n
     volumes:
-      - ${HOME}/Documents/docker/data/n8n_postgres_data:/var/lib/postgresql/data
+      - ${DOCKER_DATA_HOME}/n8n_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U n8n -d n8n"]
       interval: 10s
@@ -42,7 +42,7 @@ services:
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
     volumes:
-      - ${HOME}/Documents/docker/data/n8n_data:/home/node/.n8n
+      - ${DOCKER_DATA_HOME}/n8n_data:/home/node/.n8n
     networks:
       - n8n_net
 
