@@ -29,3 +29,28 @@ See `.env.example` in each stack folder for required variables.
 Stack folder name is uppercased with hyphens replaced by underscores:
 - `my-app` → `PORTAINER_WEBHOOK_MY_APP`
 - `traefik` → `PORTAINER_WEBHOOK_TRAEFIK`
+
+## Environment variables (host machine)
+
+All volume paths in compose files use `${DOCKER_DATA_HOME}`. Set this in `~/.zshrc`:
+
+```bash
+export DOCKER_DATA_HOME="${HOME}/Documents/docker/data"
+```
+
+## Starting Portainer
+
+Portainer is not managed as a stack — run it directly:
+
+```bash
+docker run -d \
+  -p 8000:8000 \
+  -p 9443:9443 \
+  --name portainer_agent \
+  --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /var/lib/docker/volumes:/var/lib/docker/volumes \
+  -v ${DOCKER_DATA_HOME}/portainer:/data \
+  portainer/portainer-ce:latest
+```
+
