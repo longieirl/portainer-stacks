@@ -1,0 +1,52 @@
+name: Deploy changed stacks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'stacks/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed stacks and trigger webhooks
+        run: |
+          if git rev-parse --verify HEAD~1 > /dev/null 2>&1; then
+            changed=$(git diff --name-only HEAD~1 HEAD -- stacks/ \
+              | cut -d/ -f2 | sort -u)
+          else
+            # First commit — treat all stacks as changed
+            changed=$(git ls-tree --name-only HEAD -- stacks/ | sort -u)
+          fi
+
+          if [ -z "$changed" ]; then
+            echo "No stack folders changed, skipping."
+            exit 0
+          fi
+
+          failed=0
+          for stack in $changed; do
+            secret_name="PORTAINER_WEBHOOK_$(echo "$stack" | tr '[:lower:]-' '[:upper:]_')"
+            url=$(printenv "$secret_name" || true)
+            if [ -z "$url" ]; then
+              echo "WARNING: No webhook secret found for $stack (expected $secret_name) — skipping"
+              continue
+            fi
+            echo "Triggering deploy for: $stack"
+            http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 --connect-timeout 10 -X POST "$url")
+            if [ "$http_code" != "200" ] && [ "$http_code" != "204" ]; then
+              echo "ERROR: Webhook for $stack returned HTTP $http_code"
+              failed=1
+              continue
+            fi
+            echo "$stack deploy triggered OK (HTTP $http_code)"
+          done
+          exit ${failed:-0}
+        env:
+          PORTAINER_WEBHOOK_WATCHTOWER: ${{ secrets.PORTAINER_WEBHOOK_WATCHTOWER }}
+          # Add one line per stack — see README for naming convention
