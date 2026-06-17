@@ -1,0 +1,26 @@
+# portainer-stacks
+
+> GitOps-managed Docker Compose stacks for a self-hosted Portainer CE instance on macOS. Each stack is a standalone service managed via Portainer's GitOps polling. Secrets are never stored in git — they are set in Portainer's Environment Variables UI per stack.
+
+## Documentation
+
+- [README](README.md): Setup guide, new developer checklist, GitOps wiring instructions
+- [CLAUDE.md](CLAUDE.md): Coding and contribution conventions
+
+## Stacks
+
+- [gluetun](stacks/gluetun/README.md): WireGuard VPN gateway (Surfshark). Required by deluge, jackett, qbittorrent.
+- [qbittorrent](stacks/qbittorrent/README.md): Torrent client. Routes through gluetun.
+- [deluge](stacks/deluge/docker-compose.yml): Torrent client (alternative). Routes through gluetun.
+- [jackett](stacks/jackett/docker-compose.yml): Torrent indexer proxy. Routes through gluetun.
+- [sonarr](stacks/sonarr/docker-compose.yml): TV show download automation.
+- [n8n](stacks/n8n/README.md): Workflow automation, backed by Postgres 16.
+- [watchtower](stacks/watchtower/docker-compose.yml): Nightly image auto-updates for all running containers.
+
+## Key conventions
+
+- Stack folder name must match the Portainer stack name exactly
+- All images use `:latest` — Watchtower handles updates
+- Volume paths use `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` env vars set in Portainer UI
+- GitOps uses polling (24h interval) — webhooks do not work with a LAN-hosted Portainer instance
+- gluetun must start before deluge, jackett, and qbittorrent
