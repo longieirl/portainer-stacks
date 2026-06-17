@@ -1,0 +1,35 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    restart: unless-stopped
+    hostname: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TZ=Europe/Dublin
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=10.14.0.2/16
+      - UPDATER_PERIOD=24h
+      - VPN_SERVICE_PROVIDER=surfshark
+      - SERVER_COUNTRIES=United States
+      - SERVER_CITIES=New York
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/24
+    volumes:
+      - /Users/longie/Documents/docker/data/gluetun:/gluetun
+      - /Users/longie/Documents/docker/data/port_forward:/tmp/gluetun/forwarded_port
+    ports:
+      - 3020:8000/tcp   # Built-in HTTP control server
+      - 8080:8080       # QB
+      - 8999:8999       # QB
+      - 49152:49152     # Deluge
+      - 49152:49152/udp # Deluge
+      - 8112:8112       # Deluge
+      - 6881:6881       # QB
+      - 6881:6881/udp   # QB
+      - 9117:9117       # Jackett
+      - 8191:8191       # Flare
+      - 58846:58846     # Deluge
