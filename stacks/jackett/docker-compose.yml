@@ -8,7 +8,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Dublin
-      - AUTO_UPDATE=true #optional
+      - AUTO_UPDATE=false #optional — Watchtower handles updates
     volumes:
       - ${HOME}/Documents/docker/data/jackett/config:/config
       - ${HOME}/Documents/docker/shared/downloads:/downloads
