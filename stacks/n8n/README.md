@@ -38,3 +38,11 @@ Open `http://192.168.1.6:5678` — should reach the n8n login screen.
 **4. Encryption key correct:**
 
 Log in and open any workflow that uses saved credentials. If credentials show as broken/unreadable, the `N8N_ENCRYPTION_KEY` doesn't match the config file value.
+
+## FAQ
+
+**Forgot password / can't log in:**
+```bash
+docker exec n8n n8n user-management:reset
+```
+Resets the owner account — you'll be prompted to create a new one on next login. Workflows and data stay intact.
