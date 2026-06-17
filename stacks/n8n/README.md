@@ -13,6 +13,10 @@ Set in Portainer UI → stack → Environment variables:
 
 > **Important:** `N8N_ENCRYPTION_KEY` must match the value already stored in the config file. Changing it will break all saved credentials in n8n.
 
+## Notes
+
+- `N8N_SECURE_COOKIE=false` is set in the compose file — required for HTTP access on a local network. n8n's secure cookie default blocks access over plain HTTP (and in Safari).
+
 ## Verify after deploy
 
 **1. Both containers healthy:**

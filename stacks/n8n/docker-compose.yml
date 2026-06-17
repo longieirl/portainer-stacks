@@ -41,6 +41,7 @@ services:
       DB_POSTGRESDB_USER: "n8n"
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_SECURE_COOKIE: "false"
     volumes:
       - ${DOCKER_DATA_HOME}/n8n_data:/home/node/.n8n
     networks:
