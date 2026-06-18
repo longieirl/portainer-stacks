@@ -1,1 +1,10 @@
+# Default owner for everything
 * @longieirl
+
+# Explicit ownership by area (all map to same owner — documents intent)
+stacks/**                    @longieirl
+scripts/**                   @longieirl
+.github/**                   @longieirl
+.github/workflows/**         @longieirl
+SECURITY.md                  @longieirl
+CONTRIBUTING.md              @longieirl
