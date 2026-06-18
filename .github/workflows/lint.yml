@@ -16,18 +16,7 @@ jobs:
         run: pip install yamllint
 
       - name: Lint YAML files
-        run: |
-          yamllint -d '{
-            extends: default,
-            rules: {
-              line-length: {max: 120},
-              comments: {min-spaces-from-content: 1},
-              truthy: {allowed-values: ["true", "false", "on", "off"], check-keys: false}
-            }
-          }' \
-            $(find . -name '*.yml' -o -name '*.yaml' \
-              | grep -v '.git/' \
-              | grep -v 'node_modules/')
+        run: yamllint .
 
   actions-lint:
     name: Actions lint
