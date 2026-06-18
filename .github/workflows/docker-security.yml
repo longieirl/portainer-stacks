@@ -31,8 +31,10 @@ jobs:
           echo "Changed stacks: $changed"
 
       - name: Run security review
+        env:
+          STACKS: ${{ steps.changed.outputs.stacks }}
         run: |
-          stacks="${{ steps.changed.outputs.stacks }}"
+          stacks="$STACKS"
           if [ -z "$stacks" ]; then
             echo "No stacks changed, skipping security review."
             exit 0
