@@ -1,0 +1,18 @@
+extends: default
+ignore: |
+  .git/
+  node_modules/
+rules:
+  document-start: disable
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
+  comments:
+    min-spaces-from-content: 1
+    require-starting-space: false
+  line-length:
+    max: 120
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off']
+    check-keys: false

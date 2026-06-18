@@ -60,13 +60,14 @@ jobs:
               fi
             }
 
-            check "privileged: true"          'privileged:\s*true'                      "HIGH"
-            check "network_mode: host"        'network_mode:\s*["'"'"']?host'           "HIGH"
-            check "Docker socket mount"       '/var/run/docker\.sock'                   "MEDIUM - review required (intentional for watchtower)"
-            check "cap_add present"           'cap_add:'                                "MEDIUM - review capabilities list"
-            check "SYS_ADMIN capability"      'SYS_ADMIN'                               "HIGH"
-            check "ALL capabilities"          'ALL'                                     "HIGH"
-            check "user: root"                'user:\s*["'"'"']?root'                   "MEDIUM"
+            check "privileged: true" 'privileged:\s*true' "HIGH"
+            check "network_mode: host" 'network_mode:\s*["'"'"']?host' "HIGH"
+            check "Docker socket mount" '/var/run/docker\.sock' \
+              "MEDIUM - review required (intentional for watchtower)"
+            check "cap_add present" 'cap_add:' "MEDIUM - review capabilities list"
+            check "SYS_ADMIN capability" 'SYS_ADMIN' "HIGH"
+            check "ALL capabilities" 'ALL' "HIGH"
+            check "user: root" 'user:\s*["'"'"']?root' "MEDIUM"
           done
 
           echo ""
