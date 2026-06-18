@@ -31,7 +31,11 @@ jobs:
           else
             changed=$(git ls-tree --name-only HEAD -- stacks/ | sort -u)
           fi
-          echo "stacks=$changed" >> "$GITHUB_OUTPUT"
+          {
+            echo "stacks<<EOF"
+            echo "$changed"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "Changed stacks: $changed"
 
       - name: Run security review
@@ -45,6 +49,7 @@ jobs:
           fi
 
           findings=0
+          high_findings=0
 
           for stack in $stacks; do
             compose="stacks/$stack/docker-compose.yml"
@@ -63,6 +68,9 @@ jobs:
               if grep -qE "$pattern" "$compose"; then
                 echo "  [$severity] $label"
                 findings=$((findings + 1))
+                if [ "$severity" = "HIGH" ]; then
+                  high_findings=$((high_findings + 1))
+                fi
               fi
             }
 
@@ -84,6 +92,6 @@ jobs:
             echo "Security review complete: no flagged patterns found."
           fi
 
-          # Reports findings but does not fail the build.
-          # Findings must be reviewed by @longieirl before merge (enforced by CODEOWNERS).
-          exit 0
+          # HIGH severity findings fail the build. MEDIUM findings are advisory only.
+          # Known-accepted HIGH patterns must be documented in SECURITY.md before merge.
+          exit "$high_findings"
