@@ -122,3 +122,9 @@ export DOCKER_SHARED_HOME="${HOME}/Documents/docker/shared"
 ```
 
 Or run the setup script: `bash scripts/setup-env.sh`
+
+---
+
+## License
+
+[MIT](LICENSE)
