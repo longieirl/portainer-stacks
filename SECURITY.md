@@ -27,6 +27,12 @@ You will receive a response within 5 business days. There is no bug bounty progr
 
 Only the `main` branch is actively maintained.
 
+## Push protection bypass policy
+
+Secret scanning push protection can be bypassed by users with write access. This is not
+permitted unless the detected secret is a confirmed false positive. Any bypass must be
+reviewed by the repository owner. Bypass events are logged in the repository audit log.
+
 ## Known accepted risks
 
 The following patterns exist intentionally and are documented here:

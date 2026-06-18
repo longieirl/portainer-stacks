@@ -6,5 +6,10 @@ stacks/**                    @longieirl
 scripts/**                   @longieirl
 .github/**                   @longieirl
 .github/workflows/**         @longieirl
+.github/CODEOWNERS           @longieirl
+.github/dependabot.yml       @longieirl
 SECURITY.md                  @longieirl
 CONTRIBUTING.md              @longieirl
+LICENSE                      @longieirl
+*.yml                        @longieirl
+*.yaml                       @longieirl
