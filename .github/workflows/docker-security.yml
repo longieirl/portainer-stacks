@@ -1,0 +1,85 @@
+name: Docker security review
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'stacks/**'
+  pull_request:
+    paths:
+      - 'stacks/**'
+
+jobs:
+  security-review:
+    name: Docker Compose security review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed stacks
+        id: changed
+        run: |
+          if git rev-parse --verify HEAD~1 > /dev/null 2>&1; then
+            changed=$(git diff --name-only HEAD~1 HEAD -- stacks/ \
+              | cut -d/ -f2 | sort -u)
+          else
+            changed=$(git ls-tree --name-only HEAD -- stacks/ | sort -u)
+          fi
+          echo "stacks=$changed" >> "$GITHUB_OUTPUT"
+          echo "Changed stacks: $changed"
+
+      - name: Run security review
+        env:
+          STACKS: ${{ steps.changed.outputs.stacks }}
+        run: |
+          stacks="$STACKS"
+          if [ -z "$stacks" ]; then
+            echo "No stacks changed, skipping security review."
+            exit 0
+          fi
+
+          findings=0
+
+          for stack in $stacks; do
+            compose="stacks/$stack/docker-compose.yml"
+            if [ ! -f "$compose" ]; then
+              echo "WARNING: $compose not found — skipping"
+              continue
+            fi
+
+            echo ""
+            echo "=== Security review: $compose ==="
+
+            check() {
+              local label="$1"
+              local pattern="$2"
+              local severity="$3"
+              if grep -qE "$pattern" "$compose"; then
+                echo "  [$severity] $label"
+                findings=$((findings + 1))
+              fi
+            }
+
+            check "privileged: true" 'privileged:\s*true' "HIGH"
+            check "network_mode: host" 'network_mode:\s*["'"'"']?host' "HIGH"
+            check "Docker socket mount" '/var/run/docker\.sock' \
+              "MEDIUM - review required (intentional for watchtower)"
+            check "cap_add present" 'cap_add:' "MEDIUM - review capabilities list"
+            check "SYS_ADMIN capability" 'SYS_ADMIN' "HIGH"
+            check "ALL capabilities" 'ALL' "HIGH"
+            check "user: root" 'user:\s*["'"'"']?root' "MEDIUM"
+          done
+
+          echo ""
+          if [ "$findings" -gt 0 ]; then
+            echo "Security review complete: $findings finding(s) require reviewer attention."
+            echo "See SECURITY.md for known-accepted patterns in this repository."
+          else
+            echo "Security review complete: no flagged patterns found."
+          fi
+
+          # Reports findings but does not fail the build.
+          # Findings must be reviewed by @longieirl before merge (enforced by CODEOWNERS).
+          exit 0
