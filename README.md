@@ -96,6 +96,7 @@ Stacks that also need secrets:
 - [ ] gluetun, n8n have their secret vars set
 - [ ] Push a trivial change to any stack → GitHub Actions "Validate changed stacks" passes (green)
 - [ ] Wait for or manually trigger a Portainer poll → stack redeploys from git
+- [ ] Verify Watchtower nightly run (runs 04:00 UTC): `docker logs watchtower --since 24h` — check `Session done` line shows `Failed=0` and no API errors
 
 ---
 
