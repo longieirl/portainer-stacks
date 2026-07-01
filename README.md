@@ -108,6 +108,14 @@ gluetun **must be running** before starting deluge, jackett, or qbittorrent — 
 
 ---
 
+## Known host port conflicts (macOS)
+
+| Port | Conflict | Resolution |
+|---|---|---|
+| `49152` | macOS `rapportd` (Handoff/iPhone mirroring) owns this port permanently | gluetun maps host `49153` → container `49152`; set Deluge incoming port to `49153` in Deluge Preferences → Network |
+
+---
+
 ## Secrets
 
 Never commit `.env` files. Real values live in Portainer's Environment Variables UI only.
