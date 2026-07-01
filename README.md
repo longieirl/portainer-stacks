@@ -73,7 +73,9 @@ After saving, confirm the stack shows "GitOps updates: Polling" on the stack pag
 
 Portainer CE has no global env var injection — vars must be set **per stack** in the UI.
 
-Stacks → stack name → Editor → Environment variables tab, add:
+> **Note:** GitOps-managed stacks have no compose editor in Portainer CE — the compose is locked to git and cannot be edited via the UI. To force-redeploy immediately (e.g. after port mapping changes), use Stacks → stack name → **"Pull and redeploy"**.
+
+Stacks → stack name → **Environment variables** tab, add:
 
 | Variable | Value |
 |---|---|
