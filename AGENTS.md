@@ -53,6 +53,7 @@ Never push directly to `main`. Always work on a branch. PRs required — CODEOWN
 - Portainer is started manually via `docker run` (see README) — it is not a managed stack
 - Never use `privileged: true` unless strictly required and documented why
 - gluetun must be running before deluge, jackett, and qbittorrent (all use `network_mode: container:gluetun`)
+- GitOps-managed stacks have **no compose editor** in Portainer CE UI — compose is locked to git; all changes go through git + PR. To force-redeploy immediately (e.g. after port mapping changes): Stacks → stack name → "Pull and redeploy"
 
 ## Secrets reference
 

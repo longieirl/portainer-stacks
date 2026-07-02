@@ -73,7 +73,9 @@ After saving, confirm the stack shows "GitOps updates: Polling" on the stack pag
 
 Portainer CE has no global env var injection — vars must be set **per stack** in the UI.
 
-Stacks → stack name → Editor → Environment variables tab, add:
+> **Note:** GitOps-managed stacks have no compose editor in Portainer CE — the compose is locked to git and cannot be edited via the UI. To force-redeploy immediately (e.g. after port mapping changes), use Stacks → stack name → **"Pull and redeploy"**.
+
+Stacks → stack name → **Environment variables** tab, add:
 
 | Variable | Value |
 |---|---|
@@ -103,6 +105,14 @@ Stacks that also need secrets:
 ## Stack dependency order
 
 gluetun **must be running** before starting deluge, jackett, or qbittorrent — all three use `network_mode: container:gluetun`.
+
+---
+
+## Known host port conflicts (macOS)
+
+| Port | Conflict | Resolution |
+|---|---|---|
+| `49152` | macOS `rapportd` (Handoff/iPhone mirroring) owns this port permanently | gluetun maps host `49153` → container `49152`; set Deluge incoming port to `49153` in Deluge Preferences → Network |
 
 ---
 

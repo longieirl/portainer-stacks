@@ -25,8 +25,8 @@ services:
       - 3020:8000/tcp   # Built-in HTTP control server
       - 8080:8080       # QB
       - 8999:8999       # QB
-      - 49152:49152     # Deluge
-      - 49152:49152/udp # Deluge
+      - 49153:49152     # Deluge (49152 reserved by macOS rapportd)
+      - 49153:49152/udp # Deluge (49152 reserved by macOS rapportd)
       - 8112:8112       # Deluge
       - 6881:6881       # QB
       - 6881:6881/udp   # QB
