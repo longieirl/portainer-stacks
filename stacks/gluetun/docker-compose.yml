@@ -18,12 +18,12 @@ services:
       - SERVER_COUNTRIES=United States
       - SERVER_CITIES=New York
       - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24
+      - FIREWALL_INPUT_PORTS=8080
     volumes:
       - ${DOCKER_DATA_HOME}/gluetun:/gluetun
       - ${DOCKER_DATA_HOME}/port_forward:/tmp/gluetun/forwarded_port
     ports:
       - 3020:8000/tcp   # Built-in HTTP control server
-      - 8080:8080       # QB
       - 8999:8999       # QB
       - 49153:49152     # Deluge (49152 reserved by macOS rapportd)
       - 49153:49152/udp # Deluge (49152 reserved by macOS rapportd)
@@ -33,3 +33,9 @@ services:
       - 9117:9117       # Jackett
 
       - 58846:58846     # Deluge
+    networks:
+      - proxy_net
+
+networks:
+  proxy_net:
+    external: true

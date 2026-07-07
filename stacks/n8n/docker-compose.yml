@@ -25,8 +25,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "5678:5678"
     environment:
       GENERIC_TIMEZONE: "Europe/Dublin"
       TZ: "Europe/Dublin"
@@ -41,12 +39,18 @@ services:
       DB_POSTGRESDB_USER: "n8n"
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
-      N8N_SECURE_COOKIE: "false"
+      N8N_SECURE_COOKIE: "true"
+      N8N_PROTOCOL: "https"
+      N8N_HOST: "192.168.1.6"
+      N8N_PORT: "443"
     volumes:
       - ${DOCKER_DATA_HOME}/n8n_data:/home/node/.n8n
     networks:
       - n8n_net
+      - proxy_net
 
 networks:
   n8n_net:
     driver: bridge
+  proxy_net:
+    external: true

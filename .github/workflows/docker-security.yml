@@ -80,7 +80,8 @@ jobs:
               "MEDIUM - review required (intentional for watchtower)"
             check "cap_add present" 'cap_add:' "MEDIUM - review capabilities list"
             check "SYS_ADMIN capability" 'SYS_ADMIN' "HIGH"
-            check "ALL capabilities" '^\s*-\s*ALL\s*$' "HIGH"
+            check "ALL capabilities (block)"  '^\s*-\s*ALL\s*$'       "HIGH"
+            check "ALL capabilities (inline)" 'cap_add\s*:\s*\[.*ALL' "HIGH"
             check "user: root" 'user:\s*["'"'"']?root' "MEDIUM"
           done
 

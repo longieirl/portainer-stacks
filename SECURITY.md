@@ -33,6 +33,37 @@ Secret scanning push protection can be bypassed by users with write access. This
 permitted unless the detected secret is a confirmed false positive. Any bypass must be
 reviewed by the repository owner. Bypass events are logged in the repository audit log.
 
+## TLS strategy
+
+All services run on a private LAN. The threat model is credential interception by another device on the same network, not external attack. The following decisions reflect that:
+
+### Decision table
+
+| Service | Approach | Reason |
+|---|---|---|
+| **n8n** | HTTPS via Caddy reverse proxy | Stores OAuth tokens and API keys; `N8N_SECURE_COOKIE=true` requires HTTPS |
+| **Sonarr** | HTTPS via Caddy reverse proxy | No native TLS; co-located with n8n behind the same Caddy instance — zero extra overhead |
+| **qBittorrent** | HTTPS via Caddy reverse proxy | Uses `network_mode: container:gluetun` — no independent network; Caddy reaches it via gluetun on `proxy_net`; port 8080 removed from host |
+| **Jackett** | Plain HTTP, accepted risk | No native TLS, no proxy; API key only used by internal containers; low exposure on trusted LAN |
+| **Deluge** | Plain HTTP, accepted risk | No native TLS; WebUI accessed infrequently; acceptable on trusted LAN |
+| **FlareSolverr** | Plain HTTP, accepted risk | Container-to-container only; not user-facing; TLS adds no practical benefit |
+| **Portainer** | HTTPS by default (port 9443) | Ships with self-signed cert out of the box |
+| **PostgreSQL (n8n)** | Plain TCP, accepted risk | Internal container network only; not reachable from host or LAN |
+
+### Caddy reverse proxy
+
+A single Caddy instance in `stacks/caddy/` fronts n8n (port 443), qBittorrent (port 8080, via gluetun), and Sonarr (port 8989). Caddyfile site addresses use `https://192.168.1.6:PORT` — Caddy issues a certificate with the correct IP SAN automatically via its local CA. No manual certificate generation or renewal is required. See `stacks/caddy/README.md` for deploy order and CA trust instructions.
+
+### If the homelab grows
+
+Once three or more web applications are running, routing all of them through Caddy is simpler than managing per-service TLS. To add a new service: join it to `proxy_net`, add a block to the Caddyfile in `stacks/caddy/docker-compose.yml`, and redeploy the caddy stack.
+
+### What is intentionally out of scope
+
+- Database encryption in transit (Postgres): internal network, single-user, not worth the operational cost
+- Docker daemon TLS: out of scope for this repository
+- mTLS between containers: not warranted for a single-user homelab
+
 ## Known accepted risks
 
 The following patterns exist intentionally and are documented here:
@@ -43,3 +74,4 @@ The following patterns exist intentionally and are documented here:
 | `cap_add: NET_ADMIN` | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `/dev/net/tun` device | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `:latest` image tags | all stacks | Intentional — Watchtower manages updates |
+| `FIREWALL_INPUT_PORTS=8080` | `stacks/gluetun/docker-compose.yml` | Allows Caddy (on `proxy_net`) to reach qBittorrent WebUI via gluetun's network namespace. Opens port 8080 on gluetun's default Docker interface only — not on the WireGuard `tun0` interface |
