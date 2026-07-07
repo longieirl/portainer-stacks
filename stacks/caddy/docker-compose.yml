@@ -6,8 +6,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
-      - "8989:8989"
     volumes:
       - ${DOCKER_DATA_HOME}/caddy_data:/data
       - ${DOCKER_DATA_HOME}/caddy_config:/config
@@ -30,16 +28,6 @@ configs:
 
       https://192.168.1.6 {
           reverse_proxy n8n:5678
-      }
-
-      https://192.168.1.6:8080 {
-          tls internal
-          reverse_proxy gluetun:8080
-      }
-
-      https://192.168.1.6:8989 {
-          tls internal
-          reverse_proxy sonarr:8989
       }
 
 networks:
