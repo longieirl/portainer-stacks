@@ -38,4 +38,5 @@ configs:
 
 networks:
   proxy_net:
-    external: true
+    name: proxy_net
+    driver: bridge
