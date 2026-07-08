@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: caddy:latest
+    image: slothcroissant/caddy-cloudflaredns:latest
     container_name: caddy
     restart: unless-stopped
     ports:
@@ -14,20 +14,61 @@ services:
         target: /etc/caddy/Caddyfile
     networks:
       - proxy_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    mem_limit: 256m
+    environment:
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
 
 configs:
   caddyfile:
     content: |
       {
-          local_certs
+          acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
       }
 
-      http://192.168.1.6:80 {
-          redir https://192.168.1.6{uri} permanent
+      portainer.longie.net {
+          reverse_proxy 192.168.1.6:9443 {
+              transport http {
+                  tls_insecure_skip_verify
+              }
+          }
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
       }
 
-      https://192.168.1.6 {
-          reverse_proxy n8n:5678
+      sonarr.longie.net {
+          reverse_proxy 192.168.1.6:8989
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
+      }
+
+      jackett.longie.net {
+          reverse_proxy 192.168.1.6:9117
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
+      }
+
+      qbt.longie.net {
+          reverse_proxy 192.168.1.6:8080
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
       }
 
 networks:

@@ -1,4 +1,3 @@
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -17,9 +16,20 @@ services:
       retries: 10
     networks:
       - n8n_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+      - FOWNER
+    mem_limit: 512m
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n:latest
+    image: docker.n8n.io/n8nio/n8n:stable
     container_name: n8n
     restart: unless-stopped
     depends_on:
@@ -41,16 +51,34 @@ services:
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
       N8N_SECURE_COOKIE: "true"
       N8N_PROTOCOL: "https"
-      N8N_HOST: "192.168.1.6"
+      N8N_HOST: "n8n.longie.net"
       N8N_PORT: "443"
+      WEBHOOK_URL: "https://n8n.longie.net"
     volumes:
       - ${DOCKER_DATA_HOME}/n8n_data:/home/node/.n8n
     networks:
       - n8n_net
-      - proxy_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 1g
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-n8n
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - n8n_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 128m
 
 networks:
   n8n_net:
     driver: bridge
-  proxy_net:
-    external: true
