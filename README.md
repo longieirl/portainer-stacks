@@ -39,17 +39,16 @@ Portainer is not managed as a stack — run it directly:
 
 ```bash
 docker run -d \
-  -p 8000:8000 \
-  -p 9443:9443 \
-  --name portainer_agent \
+  -p 127.0.0.1:9443:9443 \
+  --name portainer \
   --restart=always \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /var/lib/docker/volumes:/var/lib/docker/volumes \
-  -v ${DOCKER_DATA_HOME}/portainer:/data \
-  portainer/portainer-ce:latest
+  -v portainer_data:/data \
+  portainer/portainer-ce:latest \
+  --trusted-origins https://portainer.longie.net
 ```
 
-Access at `https://localhost:9443`.
+Access at `https://portainer.longie.net` (LAN only — routed via Caddy reverse proxy).
 
 ### 3. Wire each stack to GitOps in Portainer
 
@@ -87,15 +86,18 @@ Stacks that also need secrets:
 | Stack | Additional vars |
 |---|---|
 | `gluetun` | `WIREGUARD_PRIVATE_KEY` |
-| `n8n` | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY` |
+| `n8n` | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY`, `CLOUDFLARE_TUNNEL_TOKEN` |
+| `caddy` | `CLOUDFLARE_API_TOKEN` |
 
 ### 5. Verify end-to-end
 
-- [ ] All 7 stacks running in Portainer: gluetun, deluge, jackett, qbittorrent, sonarr, n8n, watchtower
+- [ ] All 8 stacks running in Portainer: gluetun, deluge, jackett, qbittorrent, sonarr, n8n, caddy, watchtower
 - [ ] Each stack shows GitOps source pointing to this repo
 - [ ] Each stack has polling set to 24h
 - [ ] `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` set in each stack's Environment Variables tab
-- [ ] gluetun, n8n have their secret vars set
+- [ ] gluetun, n8n, caddy have their secret vars set (see table above)
+- [ ] `https://n8n.longie.net` loads — Cloudflare Tunnel active
+- [ ] `https://portainer.longie.net` loads from LAN — Caddy DNS-01 cert valid, no browser warning
 - [ ] Push a trivial change to any stack → GitHub Actions "Validate changed stacks" passes (green)
 - [ ] Wait for or manually trigger a Portainer poll → stack redeploys from git
 - [ ] Verify Watchtower nightly run (runs 04:00 UTC): `docker logs watchtower --since 24h` — check `Session done` line shows `Failed=0` and no API errors

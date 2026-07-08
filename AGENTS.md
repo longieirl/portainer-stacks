@@ -21,7 +21,8 @@ scripts/        Host setup scripts
 ## Key URLs
 
 - Repo: https://github.com/longieirl/portainer-stacks
-- Portainer: https://192.168.1.6:9443
+- Portainer: https://portainer.longie.net (LAN only — proxied via Caddy)
+- n8n: https://n8n.longie.net (via Cloudflare Tunnel)
 
 ## Git Conventions
 
@@ -45,7 +46,7 @@ Never push directly to `main`. Always work on a branch. PRs required — CODEOWN
 ## Domain Rules
 
 - Stack folder name must exactly match the Portainer stack name
-- `image:` tags use `:latest` — Watchtower handles updates, no pinning
+- `image:` tags use `:latest` — Watchtower handles updates, no pinning. Exception: `n8n` uses `stable` tag (internet-facing service).
 - No secrets in git — real values set in Portainer's Environment Variables UI per stack
 - `.env.example` per stack documents all required vars
 - `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` must be set in Portainer UI for every stack (CE has no global env var injection)
@@ -60,4 +61,5 @@ Never push directly to `main`. Always work on a branch. PRs required — CODEOWN
 | Stack | Secret vars (Portainer UI only) |
 |---|---|
 | gluetun | `WIREGUARD_PRIVATE_KEY` |
-| n8n | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY` |
+| n8n | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY`, `CLOUDFLARE_TUNNEL_TOKEN` |
+| caddy | `CLOUDFLARE_API_TOKEN` |
