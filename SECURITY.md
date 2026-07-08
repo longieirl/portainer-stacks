@@ -74,5 +74,6 @@ The following patterns exist intentionally and are documented here:
 | `cap_add: NET_ADMIN` | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `/dev/net/tun` device | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `:latest` image tags | all stacks except n8n | Intentional — Watchtower manages updates |
+| Hostnames and LAN IP in compose files | `stacks/caddy/docker-compose.yml`, `stacks/n8n/docker-compose.yml` | `longie.net` subdomains and `192.168.1.6` are visible in this public repo. Accepted risk: the domain is publicly queryable via WHOIS and DNS regardless; `192.168.1.6` is an RFC1918 private address unreachable from the internet. This is information disclosure (reveals which services are running) but not exploitable for this threat model. |
 | `cap_add: NET_BIND_SERVICE` | `stacks/caddy/docker-compose.yml` | Required for Caddy to bind ports 80/443 as non-root |
 | `cap_add: CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER` | `stacks/n8n/docker-compose.yml` (postgres) | Required for PostgreSQL data directory ownership with `cap_drop: ALL` |
