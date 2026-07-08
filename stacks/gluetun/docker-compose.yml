@@ -6,6 +6,8 @@ services:
     hostname: gluetun
     cap_add:
       - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
@@ -22,13 +24,14 @@ services:
       - ${DOCKER_DATA_HOME}/gluetun:/gluetun
       - ${DOCKER_DATA_HOME}/port_forward:/tmp/gluetun/forwarded_port
     ports:
-      - 3020:8000/tcp   # Built-in HTTP control server
-      - 8080:8080       # QB WebUI
-      - 8999:8999       # QB
-      - 49153:49152     # Deluge (49152 reserved by macOS rapportd)
-      - 49153:49152/udp # Deluge (49152 reserved by macOS rapportd)
-      - 8112:8112       # Deluge
-      - 6881:6881       # QB
-      - 6881:6881/udp   # QB
-      - 9117:9117       # Jackett
-      - 58846:58846     # Deluge
+      - 127.0.0.1:3020:8000/tcp   # Built-in HTTP control server — LAN only via Caddy
+      - 127.0.0.1:8080:8080       # QB WebUI — LAN only via Caddy
+      - 127.0.0.1:8999:8999       # QB torrenting port
+      - 127.0.0.1:49153:49152     # Deluge (49152 reserved by macOS rapportd)
+      - 127.0.0.1:49153:49152/udp # Deluge
+      - 127.0.0.1:8112:8112       # Deluge WebUI — LAN only via Caddy
+      - 127.0.0.1:6881:6881       # QB
+      - 127.0.0.1:6881:6881/udp   # QB
+      - 127.0.0.1:9117:9117       # Jackett — LAN only via Caddy
+      - 127.0.0.1:58846:58846     # Deluge daemon
+    mem_limit: 256m
