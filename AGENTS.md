@@ -49,7 +49,7 @@ Never push directly to `main`. Always work on a branch. PRs required — CODEOWN
 - `image:` tags use `:latest` — Watchtower handles updates, no pinning. Exception: `n8n` uses `stable` tag (internet-facing service).
 - No secrets in git — real values set in Portainer's Environment Variables UI per stack
 - `.env.example` per stack documents all required vars
-- `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` must be set in Portainer UI for every stack (CE has no global env var injection)
+- `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` must be set in Portainer UI for every stack at creation/redeploy time (CE has no global env var injection)
 - `stack.env` files must not be committed — they would expose host paths when repo goes public
 - Portainer is started manually via `docker run` (see README) — it is not a managed stack
 - Never use `privileged: true` unless strictly required and documented why
