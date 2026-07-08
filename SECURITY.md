@@ -52,11 +52,11 @@ All services run on a private LAN. The threat model is credential interception b
 
 ### Caddy reverse proxy
 
-A single Caddy instance in `stacks/caddy/` fronts n8n (port 443), qBittorrent (port 8080, via gluetun), and Sonarr (port 8989). Caddyfile site addresses use `https://192.168.1.6:PORT` — Caddy issues a certificate with the correct IP SAN automatically via its local CA. No manual certificate generation or renewal is required. See `stacks/caddy/README.md` for deploy order and CA trust instructions.
+Caddy in `stacks/caddy/` uses DNS-01 ACME challenge via Cloudflare to issue real Let's Encrypt certificates for `*.longie.net` subdomains. All LAN services are proxied via named subdomains. n8n is exposed publicly via Cloudflare Tunnel — no inbound router ports required.
 
 ### If the homelab grows
 
-Once three or more web applications are running, routing all of them through Caddy is simpler than managing per-service TLS. To add a new service: join it to `proxy_net`, add a block to the Caddyfile in `stacks/caddy/docker-compose.yml`, and redeploy the caddy stack.
+Once three or more web applications are running, routing all of them through Caddy is simpler than managing per-service TLS. To add a new service: add a block to the Caddyfile in `stacks/caddy/docker-compose.yml` and redeploy the caddy stack.
 
 ### What is intentionally out of scope
 
@@ -73,5 +73,6 @@ The following patterns exist intentionally and are documented here:
 | `/var/run/docker.sock` mount | `stacks/watchtower/docker-compose.yml` | Watchtower requires Docker socket to manage containers |
 | `cap_add: NET_ADMIN` | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `/dev/net/tun` device | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
-| `:latest` image tags | all stacks | Intentional — Watchtower manages updates |
-| `FIREWALL_INPUT_PORTS=8080` | `stacks/gluetun/docker-compose.yml` | Allows Caddy (on `proxy_net`) to reach qBittorrent WebUI via gluetun's network namespace. Opens port 8080 on gluetun's default Docker interface only — not on the WireGuard `tun0` interface |
+| `:latest` image tags | all stacks except n8n | Intentional — Watchtower manages updates |
+| `cap_add: NET_BIND_SERVICE` | `stacks/caddy/docker-compose.yml` | Required for Caddy to bind ports 80/443 as non-root |
+| `cap_add: CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER` | `stacks/n8n/docker-compose.yml` (postgres) | Required for PostgreSQL data directory ownership with `cap_drop: ALL` |
