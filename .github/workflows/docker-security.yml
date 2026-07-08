@@ -80,7 +80,13 @@ jobs:
               "MEDIUM - review required (intentional for watchtower)"
             check "cap_add present" 'cap_add:' "MEDIUM - review capabilities list"
             check "SYS_ADMIN capability" 'SYS_ADMIN' "HIGH"
-            check "ALL capabilities (block)"  '^\s*-\s*ALL\s*$'       "HIGH"
+            # Only flag ALL under cap_add — cap_drop: ALL is correct hardening practice
+            if awk '/cap_add:/,/cap_drop:|networks:|volumes:|services:|^[a-z]/' "$compose" \
+                | grep -qE '^\s*-\s*ALL\s*$'; then
+              echo "  [HIGH] ALL capabilities under cap_add (block)"
+              findings=$((findings + 1))
+              high_findings=$((high_findings + 1))
+            fi
             check "ALL capabilities (inline)" 'cap_add\s*:\s*\[.*ALL' "HIGH"
             check "user: root" 'user:\s*["'"'"']?root' "MEDIUM"
           done
