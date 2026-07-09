@@ -71,6 +71,15 @@ configs:
           }
       }
 
+      deluge.longie.net {
+          reverse_proxy 192.168.1.6:8112
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
+      }
+
 networks:
   proxy_net:
     name: proxy_net
