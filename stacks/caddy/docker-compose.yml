@@ -71,6 +71,10 @@ configs:
           reverse_proxy n8n:5678
       }
 
+      http://plex.longie.net {
+          reverse_proxy 192.168.1.6:32400
+      }
+
       portainer.longie.net {
           reverse_proxy 192.168.1.6:9443 {
               header_up Host portainer.longie.net
@@ -126,6 +130,16 @@ configs:
       # Webhook bypass paths are configured in Access policies, not here.
       n8n.longie.net {
           reverse_proxy n8n:5678
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
+      }
+
+      # NOTE: CF Access bypassed for plex.longie.net — Plex uses its own auth.
+      plex.longie.net {
+          reverse_proxy 192.168.1.6:32400
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
               X-Frame-Options "SAMEORIGIN"
