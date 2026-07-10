@@ -14,6 +14,7 @@ services:
         target: /etc/caddy/Caddyfile
     networks:
       - proxy_net
+      - remote-access
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -24,11 +25,30 @@ services:
     environment:
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
 
+  cloudflared:
+    image: cloudflare/cloudflared:2026.7.0
+    container_name: cloudflared-caddy
+    restart: unless-stopped
+    # --metrics localhost:7834 restricts Prometheus metrics to loopback only
+    command: tunnel --no-autoupdate --metrics localhost:7834 run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - proxy_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 128m
+
 configs:
   caddyfile:
     content: |
       {
           acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+          servers {
+              trusted_proxies static private_ranges
+          }
       }
 
       portainer.longie.net {
@@ -80,7 +100,21 @@ configs:
           }
       }
 
+      # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
+      # Webhook bypass paths are configured in Access policies, not here.
+      n8n.longie.net {
+          reverse_proxy n8n:5678
+          header {
+              Strict-Transport-Security "max-age=31536000; includeSubDomains"
+              X-Frame-Options "SAMEORIGIN"
+              X-Content-Type-Options "nosniff"
+          }
+      }
+
 networks:
   proxy_net:
     name: proxy_net
     driver: bridge
+  remote-access:
+    name: remote-access
+    external: true
