@@ -51,6 +51,24 @@ configs:
           }
       }
 
+      # http:// blocks handle tunnel traffic (cloudflared → http://caddy:80)
+      # without Caddy's automatic HTTP→HTTPS redirect for named sites.
+      http://portainer.longie.net {
+          reverse_proxy 192.168.1.6:9443 {
+              transport http {
+                  tls_insecure_skip_verify
+              }
+          }
+      }
+
+      http://sonarr.longie.net {
+          reverse_proxy 192.168.1.6:8989
+      }
+
+      http://n8n.longie.net {
+          reverse_proxy n8n:5678
+      }
+
       portainer.longie.net {
           reverse_proxy 192.168.1.6:9443 {
               transport http {
