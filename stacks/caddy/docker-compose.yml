@@ -46,13 +46,13 @@ configs:
     content: |
       {
           acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+          auto_https disable_redirects
           servers {
               trusted_proxies static private_ranges
           }
       }
 
-      # http:// blocks handle tunnel traffic (cloudflared → http://caddy:80)
-      # without Caddy's automatic HTTP→HTTPS redirect for named sites.
+      # http:// blocks handle tunnel traffic (cloudflared → http://caddy:80).
       http://portainer.longie.net {
           reverse_proxy 192.168.1.6:9443 {
               transport http {
