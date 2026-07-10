@@ -74,5 +74,3 @@ header_up Origin https://portainer.longie.net
 2. Connect the service container to `remote-access` network
 3. Add Caddyfile block routing to the container by name
 4. Add hostname route in Cloudflare Tunnel dashboard → `http://caddy:80`
-
-See `docs/superpowers/specs/2026-07-09-cloudflare-tunnel-access-design.md` for full architecture.
