@@ -1,86 +1,78 @@
 # Caddy
 
-Reverse proxy and TLS termination for all HTTPS-exposed services. Uses Caddy's `tls internal` to auto-generate a local CA — no manual certificate management required.
+Reverse proxy and TLS termination for all HTTPS-exposed services. Uses DNS-01 challenge via Cloudflare to issue real Let's Encrypt certificates — no local CA, no browser warnings.
+
+Also hosts the `cloudflared` container for Cloudflare Tunnel remote access.
 
 ## Services proxied
 
-| URL | Backend |
-|---|---|
-| `https://192.168.1.6` | n8n :5678 |
-| `https://192.168.1.6:8080` | qBittorrent :8080 (via gluetun) |
-| `https://192.168.1.6:8989` | Sonarr :8989 |
+| URL | Backend | Access |
+|---|---|---|
+| `https://portainer.longie.net` | `192.168.1.6:9443` (TLS) | LAN + Tunnel (GitHub OAuth) |
+| `https://sonarr.longie.net` | `192.168.1.6:8989` | LAN + Tunnel (GitHub OAuth) |
+| `https://n8n.longie.net` | `n8n:5678` (remote-access net) | Tunnel only (GitHub OAuth) |
+| `https://jackett.longie.net` | `192.168.1.6:9117` | LAN only |
+| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN only |
+| `https://deluge.longie.net` | `192.168.1.6:8112` | LAN only |
 
-`http://192.168.1.6` (port 80) redirects to HTTPS automatically. Ports 8080 and 8989 are HTTPS-only — there is no HTTP redirect on those ports; accessing them via `http://` shows a protocol error rather than a redirect. Use `https://` directly.
+## Networks
 
-## Why a dedicated Caddy stack?
+- `proxy_net` — connects Caddy and cloudflared; LAN IP routing for portainer/sonarr
+- `remote-access` — connects Caddy to n8n container by name; external network, pre-created
 
-Running one Caddy instance shared across stacks is simpler than embedding a proxy in each stack. The `proxy_net` Docker network is owned here — n8n and Sonarr join it as `external: true`. This means:
+## Required environment variables
 
-- One place to update routing rules
-- One CA cert to trust on your machine
-- No duplicate port 80/443 bindings across stacks
-
-## Deploy order
-
-**Caddy must be deployed first.** n8n and Sonarr declare `proxy_net` as an external network. If it doesn't exist, those stacks will fail to start.
-
-## First-time setup: trust Caddy's local CA
-
-Caddy generates its own certificate authority on first start. Browsers will warn until you trust it.
-
-After the caddy stack starts for the first time, run on the Docker host:
-
-```bash
-docker cp caddy:/data/caddy/pki/authorities/local/root.crt ~/caddy-root.crt
-sudo security add-trusted-cert -d -r trustRoot \
-  -k /Library/Keychains/System.keychain ~/caddy-root.crt
-```
-
-Restart your browser. All `https://192.168.1.6` URLs will load without warnings.
-
-> This is a one-time step per Mac. The CA persists in Caddy's `/data` volume — it survives container restarts and redeployments.
-
-**Safari note:** You may also need to accept the cert in System Settings → Privacy & Security → Certificates after running the command above.
-
-## Required environment variable
-
-Set in Portainer UI → stack → Environment variables:
+Set in Portainer UI → stack → Environment variables (never commit real values):
 
 | Variable | Notes |
 |---|---|
-| `DOCKER_DATA_HOME` | Host path for persistent Caddy data (TLS CA, config cache) |
+| `DOCKER_DATA_HOME` | Host path for persistent Caddy data — must be under a Docker Desktop shared path (Preferences → Resources → File Sharing). Example: `/Users/yourname/docker-data` |
+| `CLOUDFLARE_API_TOKEN` | DNS Edit token for `longie.net` zone — used for DNS-01 cert issuance |
+| `CLOUDFLARE_TUNNEL_TOKEN` | Cloudflare Tunnel token for `longie-caddy` tunnel |
+
+## Deploy order
+
+1. Pre-create `remote-access` network if not already present:
+   ```bash
+   docker network create remote-access
+   ```
+2. Set all three env vars in Portainer UI for this stack
+3. Deploy caddy stack — Caddy will issue certs on first start (~60s)
+4. Deploy n8n stack (joins `remote-access`)
 
 ## Verify after deploy
 
-**1. Container running:**
 ```bash
-docker ps | grep caddy
-```
-Expected: `caddy` shows `Up`.
+# Caddy and cloudflared running
+docker ps | grep -E "caddy|cloudflared"
 
-**2. HTTP redirects to HTTPS:**
-```bash
-curl -I http://192.168.1.6
-```
-Expected: `301` redirect to `https://192.168.1.6`.
+# Caddy can reach n8n
+docker exec caddy wget -q -O- http://n8n:5678 | head -3
 
-**3. n8n reachable over HTTPS:**
-
-Open `https://192.168.1.6` — should load the n8n login screen.
-
-**4. Sonarr reachable over HTTPS:**
-
-Open `https://192.168.1.6:8989` — should load the Sonarr UI.
-
-## Adding more services
-
-Edit the Caddyfile in `docker-compose.yml` `configs.caddyfile.content` and add a new block:
-
-```
-:PORT {
-    tls internal
-    reverse_proxy container-name:PORT
-}
+# cloudflared tunnel healthy
+docker logs cloudflared-caddy --tail 5
 ```
 
-Then add the new service's stack to `proxy_net` as `external: true`, and redeploy both stacks.
+## Known issue: Portainer CSRF "origin invalid" via reverse proxy
+
+**Symptom:** Write operations (redeploy, pull, env changes) via `https://portainer.longie.net` fail with "Forbidden - origin invalid".
+
+**Cause:** Portainer CE 2.39.4 CSRF validation compares the `Origin` header against `x_forwarded_proto://host`. Via Cloudflare Tunnel, Caddy receives plain HTTP so the scheme is `http`, and the upstream host leaks as `192.168.1.6:9443` — neither matches `portainer.longie.net`. The `--trusted-origins` flag is broken in CE 2.39.4 (crashes Portainer on startup).
+
+**Fix (already applied):** Both portainer Caddyfile blocks explicitly set:
+```
+header_up Host portainer.longie.net
+header_up Origin https://portainer.longie.net
+```
+
+**Upstream bug:** https://github.com/portainer/portainer/issues/12748
+**Local tracking:** https://github.com/longieirl/portainer-stacks/issues/38
+
+## Adding more services via tunnel
+
+1. Create Cloudflare Access application for the new hostname — **do this first**
+2. Connect the service container to `remote-access` network
+3. Add Caddyfile block routing to the container by name
+4. Add hostname route in Cloudflare Tunnel dashboard → `http://caddy:80`
+
+See `docs/superpowers/specs/2026-07-09-cloudflare-tunnel-access-design.md` for full architecture.
