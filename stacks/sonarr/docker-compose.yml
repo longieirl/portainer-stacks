@@ -10,7 +10,7 @@ services:
       - ${DOCKER_DATA_HOME}/sonarr/config:/config
       - ${DOCKER_SHARED_HOME}/downloads:/downloads
     ports:
-      - 127.0.0.1:8989:8989
+      - 8989:8989
     security_opt:
       - no-new-privileges:true
     mem_limit: 512m
