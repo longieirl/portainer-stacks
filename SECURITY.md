@@ -73,7 +73,12 @@ The following patterns exist intentionally and are documented here:
 | `/var/run/docker.sock` mount | `stacks/watchtower/docker-compose.yml` | Watchtower requires Docker socket to manage containers |
 | `cap_add: NET_ADMIN` | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `/dev/net/tun` device | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
-| `:latest` image tags | all stacks except n8n | Intentional — Watchtower manages updates |
+| `:latest` image tags | all stacks except n8n and cloudflared | Intentional — Watchtower manages updates |
+| `cloudflared` pinned image tag | `stacks/caddy/docker-compose.yml` | Security-sensitive tunnel infra — upgrade deliberately after reviewing release notes |
+| `TUNNEL_TOKEN` env var | `stacks/caddy/docker-compose.yml` | Visible via `docker inspect` and Portainer UI to any authenticated Portainer user. Blast radius: stolen token allows connecting a rogue cloudflared connector to the same tunnel. Mitigated by MFA on Cloudflare account. If compromised: revoke in Cloudflare Zero Trust dashboard and verify only one connector active. |
+| `tls_insecure_skip_verify` | `stacks/caddy/docker-compose.yml` | Portainer upstream uses self-signed cert on `192.168.1.6:9443`; LAN-only path; WAN inbound on 9443 should be firewall-blocked |
+| `trusted_proxies static private_ranges` | `stacks/caddy/docker-compose.yml` | Trusts `X-Forwarded-For` from all RFC1918 IPs. Accepted for single-user homelab with no untrusted containers on the network |
+| `proxy_net` membership | `stacks/caddy/docker-compose.yml` | Only `caddy` and `cloudflared` on `proxy_net`. Any container on this network can reach `http://caddy:80` directly, bypassing Cloudflare Access |
 | Hostnames and LAN IP in compose files | `stacks/caddy/docker-compose.yml`, `stacks/n8n/docker-compose.yml` | `longie.net` subdomains and `192.168.1.6` are visible in this public repo. Accepted risk: the domain is publicly queryable via WHOIS and DNS regardless; `192.168.1.6` is an RFC1918 private address unreachable from the internet. This is information disclosure (reveals which services are running) but not exploitable for this threat model. |
 | `cap_add: NET_BIND_SERVICE` | `stacks/caddy/docker-compose.yml` | Required for Caddy to bind ports 80/443 as non-root |
 | `cap_add: CHOWN, SETUID, SETGID, DAC_OVERRIDE, FOWNER` | `stacks/n8n/docker-compose.yml` (postgres) | Required for PostgreSQL data directory ownership with `cap_drop: ALL` |

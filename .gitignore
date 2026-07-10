@@ -8,5 +8,7 @@
 # OS noise
 .DS_Store
 Thumbs.db
+*conflicted copy*
+
 docs/superpowers/
 docs/local/
