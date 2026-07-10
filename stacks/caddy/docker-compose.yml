@@ -55,6 +55,7 @@ configs:
       # http:// blocks handle tunnel traffic (cloudflared → http://caddy:80).
       http://portainer.longie.net {
           reverse_proxy 192.168.1.6:9443 {
+              header_up Origin {scheme}://{host}
               transport http {
                   tls_insecure_skip_verify
               }
@@ -71,6 +72,7 @@ configs:
 
       portainer.longie.net {
           reverse_proxy 192.168.1.6:9443 {
+              header_up Origin {scheme}://{host}
               transport http {
                   tls_insecure_skip_verify
               }
