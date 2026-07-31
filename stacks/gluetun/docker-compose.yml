@@ -25,7 +25,7 @@ services:
       - ${DOCKER_DATA_HOME}/port_forward:/tmp/gluetun/forwarded_port
     ports:
       - 127.0.0.1:3020:8000/tcp   # Built-in HTTP control server — LAN only via Caddy
-      - 127.0.0.1:8080:8080       # QB WebUI — LAN only via Caddy
+      - 192.168.1.6:8080:8080     # QB WebUI — LAN only via Caddy
       - 127.0.0.1:8999:8999       # QB torrenting port
       - 127.0.0.1:49153:49152     # Deluge (49152 reserved by macOS rapportd)
       - 127.0.0.1:49153:49152/udp # Deluge
