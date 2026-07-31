@@ -29,9 +29,9 @@ services:
       - 127.0.0.1:8999:8999       # QB torrenting port
       - 127.0.0.1:49153:49152     # Deluge (49152 reserved by macOS rapportd)
       - 127.0.0.1:49153:49152/udp # Deluge
-      - 127.0.0.1:8112:8112       # Deluge WebUI — LAN only via Caddy
+      - 192.168.1.6:8112:8112     # Deluge WebUI — LAN only via Caddy
       - 127.0.0.1:6881:6881       # QB
       - 127.0.0.1:6881:6881/udp   # QB
       - 127.0.0.1:9117:9117       # Jackett — LAN only via Caddy
-      - 127.0.0.1:58846:58846     # Deluge daemon
+      - 192.168.1.6:58846:58846   # Deluge daemon
     mem_limit: 256m
