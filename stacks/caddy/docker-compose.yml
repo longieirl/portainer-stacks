@@ -52,6 +52,24 @@ configs:
           }
       }
 
+      # Block common scanner/bot probe paths across all sites.
+      (block_scanners) {
+          @scanners {
+              path /.env /.env.* /.git /.git/* /.gitconfig
+              path /.htpasswd /.htaccess /.DS_Store /.ssh/* /.aws/*
+              path /web.config /database.yml
+              path /wp-login.php /wp-admin/* /wp-config.php /xmlrpc.php
+              path /wp-includes/* /wp-content/*
+              path /administrator /administrator/*
+              path /phpinfo.php /info.php /php.php /test.php /setup.php
+              path /server-status /server-info /cgi-bin/*
+              path /actuator /actuator/*
+              path /phpmyadmin /phpmyadmin/* /pma /pma/* /adminer.php
+              path /cpanel /cpanel/* /plesk/* /webmin/*
+          }
+          respond @scanners 403
+      }
+
       # http:// blocks handle tunnel traffic (cloudflared → http://caddy:80).
       http://portainer.longie.net {
           reverse_proxy 192.168.1.6:9443 {
@@ -76,6 +94,7 @@ configs:
       }
 
       portainer.longie.net {
+          import block_scanners
           reverse_proxy 192.168.1.6:9443 {
               header_up Host portainer.longie.net
               header_up Origin https://portainer.longie.net
@@ -91,6 +110,7 @@ configs:
       }
 
       sonarr.longie.net {
+          import block_scanners
           reverse_proxy 192.168.1.6:8989
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -100,6 +120,7 @@ configs:
       }
 
       jackett.longie.net {
+          import block_scanners
           reverse_proxy 192.168.1.6:9117
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -109,6 +130,7 @@ configs:
       }
 
       qbt.longie.net {
+          import block_scanners
           reverse_proxy 192.168.1.6:8080
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -118,6 +140,7 @@ configs:
       }
 
       deluge.longie.net {
+          import block_scanners
           reverse_proxy 192.168.1.6:8112
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -129,6 +152,7 @@ configs:
       # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
       # Webhook bypass paths are configured in Access policies, not here.
       n8n.longie.net {
+          import block_scanners
           reverse_proxy n8n:5678
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -139,6 +163,7 @@ configs:
 
       # NOTE: CF Access bypassed for plex.longie.net — Plex uses its own auth.
       plex.longie.net {
+          import block_scanners
           reverse_proxy 192.168.1.6:32400
           header {
               Strict-Transport-Security "max-age=31536000; includeSubDomains"
