@@ -54,7 +54,19 @@ configs:
 
       # Block common scanner/bot probe paths across all sites.
       (block_scanners) {
-          @scanners path /.env /.env.* /.git /.git/* /.gitconfig /.htpasswd /.htaccess /.DS_Store /.ssh/* /.aws/* /web.config /database.yml /wp-login.php /wp-admin/* /wp-config.php /xmlrpc.php /wp-includes/* /wp-content/* /administrator /administrator/* /phpinfo.php /info.php /php.php /test.php /setup.php /server-status /server-info /cgi-bin/* /actuator /actuator/* /phpmyadmin /phpmyadmin/* /pma /pma/* /adminer.php /cpanel /cpanel/* /plesk/* /webmin/*
+          @scanners {
+              path /.env /.env.* /.git /.git/* /.gitconfig
+              path /.htpasswd /.htaccess /.DS_Store /.ssh/* /.aws/*
+              path /web.config /database.yml
+              path /wp-login.php /wp-admin/* /wp-config.php /xmlrpc.php
+              path /wp-includes/* /wp-content/*
+              path /administrator /administrator/*
+              path /phpinfo.php /info.php /php.php /test.php /setup.php
+              path /server-status /server-info /cgi-bin/*
+              path /actuator /actuator/*
+              path /phpmyadmin /phpmyadmin/* /pma /pma/* /adminer.php
+              path /cpanel /cpanel/* /plesk/* /webmin/*
+          }
           respond @scanners 403
       }
 
