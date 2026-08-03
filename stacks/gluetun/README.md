@@ -21,3 +21,13 @@ docker exec gluetun wget -qO- https://ipinfo.io/ip
 Expected: a Surfshark IP in New York, not your home IP.
 
 If the private key is wrong or missing, gluetun will log an auth error and dependent containers (deluge, jackett, qbittorrent) will have no network access.
+
+## Kill switch verification
+
+Run after any gluetun config changes or monthly:
+
+```bash
+bash scripts/test-gluetun-killswitch.sh
+```
+
+Stops gluetun, confirms qbittorrent has no internet access, then restarts and confirms VPN restored. Last verified: 2026-08-03 (PASS).
