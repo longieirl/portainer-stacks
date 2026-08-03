@@ -19,7 +19,7 @@ services:
       - VPN_SERVICE_PROVIDER=surfshark
       - SERVER_COUNTRIES=United States
       - SERVER_CITIES=New York
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.1.6/32
     volumes:
       - ${DOCKER_DATA_HOME}/gluetun:/gluetun
       - ${DOCKER_DATA_HOME}/port_forward:/tmp/gluetun/forwarded_port
