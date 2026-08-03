@@ -44,9 +44,19 @@ echo "Cloudflare Access verification"
 echo "Note: must run from OUTSIDE LAN (mobile data / VPN) — LAN bypasses CF Access by design"
 echo ""
 
-# Warn if running from LAN — 192.168.x.x source IP means results are invalid
-LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}' || echo "unknown")
-if echo "$LOCAL_IP" | grep -qE '^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\.'; then
+# Warn if running from LAN — 192.168.x.x or 10.x.x.x source IP means results are invalid.
+# 172.20.10.x is Apple iPhone Personal Hotspot — RFC1918 range but routes externally via carrier.
+LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}' || echo "unknown")
+PUBLIC_IP=$(curl -s --max-time 5 https://ifconfig.me/ip 2>/dev/null || echo "unknown")
+
+echo "Local IP:  ${LOCAL_IP}"
+echo "Public IP: ${PUBLIC_IP}"
+echo ""
+
+# 172.20.10.x = iPhone hotspot — external despite RFC1918 range
+IS_HOTSPOT=$(echo "$LOCAL_IP" | grep -qE '^172\.20\.10\.' && echo "true" || echo "false")
+
+if [ "$IS_HOTSPOT" = "false" ] && echo "$LOCAL_IP" | grep -qE '^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\.'; then
   echo "WARNING: detected LAN IP ${LOCAL_IP} — results will NOT validate CF Access."
   echo "         LAN traffic reaches Caddy directly, bypassing CF Access entirely."
   echo "         Re-run from mobile data, a remote VPN exit, or a cloud instance."
