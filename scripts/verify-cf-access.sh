@@ -17,7 +17,8 @@ check_access() {
   code=$(curl -s -o /dev/null -w "%{http_code}" \
     --max-time 10 \
     -L \
-    "${url}" 2>/dev/null || echo "000")
+    "${url}" 2>/dev/null)
+  code="${code:-000}"
 
   if [ "$expect_blocked" = "true" ]; then
     # CF Access redirects to login or returns 403 — never 200 straight through
@@ -42,6 +43,15 @@ check_access() {
 echo "Cloudflare Access verification"
 echo "Note: must run from OUTSIDE LAN (mobile data / VPN) — LAN bypasses CF Access by design"
 echo ""
+
+# Warn if running from LAN — 192.168.x.x source IP means results are invalid
+LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}' || echo "unknown")
+if echo "$LOCAL_IP" | grep -qE '^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\.'; then
+  echo "WARNING: detected LAN IP ${LOCAL_IP} — results will NOT validate CF Access."
+  echo "         LAN traffic reaches Caddy directly, bypassing CF Access entirely."
+  echo "         Re-run from mobile data, a remote VPN exit, or a cloud instance."
+  echo ""
+fi
 
 echo "=== Protected hostnames (should NOT return 200 unauthenticated) ==="
 check_access "portainer.longie.net" "https://portainer.longie.net"
