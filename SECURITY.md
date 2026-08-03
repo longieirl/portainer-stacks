@@ -70,7 +70,7 @@ The following patterns exist intentionally and are documented here:
 
 | Pattern | File | Reason |
 |---|---|---|
-| `/var/run/docker.sock` mount | `stacks/watchtower/docker-compose.yml` | Watchtower requires Docker socket to manage containers |
+| `/var/run/docker.sock` mount | `stacks/watchtower/docker-compose.yml`, `stacks/portainer/docker-compose.yml` | Watchtower requires Docker socket to manage containers; Portainer requires it to manage all stacks |
 | `cap_add: NET_ADMIN` | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `/dev/net/tun` device | `stacks/gluetun/docker-compose.yml` | Required for WireGuard VPN tunnel |
 | `:latest` image tags | all stacks except n8n and cloudflared | Intentional — Watchtower manages updates |
