@@ -8,11 +8,12 @@
 set -euo pipefail
 
 PASS=true
+WARN_COUNT=0
 
 check_access() {
   local name="$1"
   local url="$2"
-  local expect_blocked="${3:-true}"  # false for intentionally public paths
+  local expect_blocked="${3:-true}"
 
   code=$(curl -s -o /dev/null -w "%{http_code}" \
     --max-time 10 \
@@ -20,19 +21,19 @@ check_access() {
     "${url}" 2>/dev/null) || code="000"
 
   if [ "$expect_blocked" = "true" ]; then
-    # CF Access redirects to login or returns 403 — never 200 straight through
     if [ "$code" = "200" ]; then
       echo "  FAIL: ${name} — got 200, CF Access may not be active (${url})"
       PASS=false
     elif [ "$code" = "000" ]; then
       echo "  WARN: ${name} — no response / timeout (${url})"
+      WARN_COUNT=$((WARN_COUNT + 1))
     else
       echo "  PASS: ${name} — got ${code}, Access gate active"
     fi
   else
-    # Public bypass path — any response except 000 is acceptable
     if [ "$code" = "000" ]; then
       echo "  WARN: ${name} — no response / timeout (${url})"
+      WARN_COUNT=$((WARN_COUNT + 1))
     else
       echo "  OK:   ${name} — got ${code} (bypass path, expected public)"
     fi
@@ -76,14 +77,21 @@ check_access "plex.longie.net (PlexBypass)" "https://plex.longie.net" "false"
 check_access "n8n webhook path"             "https://n8n.longie.net/webhook/" "false"
 
 echo ""
-if [ "$PASS" = true ]; then
+if [ "$PASS" = false ]; then
+  echo "Result: FAIL — one or more hostnames returned 200 without authentication"
+  echo "Check: Cloudflare Zero Trust → Access → Applications → verify policy is Enabled"
+  exit 1
+elif [ "$WARN_COUNT" -gt 4 ]; then
+  echo "Result: INCONCLUSIVE — too many timeouts (${WARN_COUNT}) to validate"
+  echo "Likely cause: network blocking HTTPS, tunnel down, or DNS not resolving."
+  echo "  1. Check tunnel: Cloudflare Zero Trust → Tunnels → longie-caddy → status"
+  echo "  2. Verify DNS: dig portainer.longie.net"
+  echo "  3. Try from a different network (not iPhone hotspot — it may block HTTPS)"
+  exit 2
+else
   echo "Result: PASS — CF Access active for all protected hostnames $(date '+%Y-%m-%d')"
   echo ""
   echo "IMPORTANT: A non-200 response confirms the gate is present but does NOT confirm"
   echo "the policy requires YOUR GitHub account. Verify policies in:"
   echo "Cloudflare Zero Trust → Access → Applications → each app → Policies tab"
-else
-  echo "Result: FAIL — one or more hostnames returned 200 without authentication"
-  echo "Check: Cloudflare Zero Trust → Access → Applications → verify policy is Enabled"
-  exit 1
 fi
