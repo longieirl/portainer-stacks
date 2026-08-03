@@ -1,0 +1,134 @@
+{
+    acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    auto_https disable_redirects
+    servers {
+        trusted_proxies static private_ranges
+    }
+    log {
+        output file /data/caddy-access.log {
+            roll_size 10mb
+            roll_keep 10
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+}
+
+# Block common scanner/bot probe paths across all sites.
+(block_scanners) {
+    @scanners {
+        path /.env /.env.* /.git /.git/* /.gitconfig
+        path /.htpasswd /.htaccess /.DS_Store /.ssh/* /.aws/*
+        path /web.config /database.yml
+        path /wp-login.php /wp-admin/* /wp-config.php /xmlrpc.php
+        path /wp-includes/* /wp-content/*
+        path /administrator /administrator/*
+        path /phpinfo.php /info.php /php.php /test.php /setup.php
+        path /server-status /server-info /cgi-bin/*
+        path /actuator /actuator/*
+        path /phpmyadmin /phpmyadmin/* /pma /pma/* /adminer.php
+        path /cpanel /cpanel/* /plesk/* /webmin/*
+    }
+    respond @scanners 403
+}
+
+(security_headers) {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+        X-XSS-Protection "1; mode=block"
+        -Server
+        -X-Powered-By
+    }
+}
+
+(body_limit) {
+    request_body {
+        max_size 50MB
+    }
+}
+
+# http:// blocks handle tunnel traffic (cloudflared → http://caddy:80).
+http://portainer.longie.net {
+    reverse_proxy 192.168.1.6:9443 {
+        header_up Host portainer.longie.net
+        header_up Origin https://portainer.longie.net
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}
+
+http://sonarr.longie.net {
+    reverse_proxy 192.168.1.6:8989
+}
+
+http://n8n.longie.net {
+    reverse_proxy n8n:5678
+}
+
+http://plex.longie.net {
+    reverse_proxy 192.168.1.6:32400
+}
+
+portainer.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy 192.168.1.6:9443 {
+        header_up Host portainer.longie.net
+        header_up Origin https://portainer.longie.net
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}
+
+sonarr.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy 192.168.1.6:8989
+}
+
+jackett.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy 192.168.1.6:9117
+}
+
+qbt.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy 192.168.1.6:8080
+}
+
+deluge.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy 192.168.1.6:8112
+}
+
+# NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
+# Webhook bypass paths are configured in Access policies, not here.
+n8n.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy n8n:5678
+}
+
+# NOTE: CF Access bypassed for plex.longie.net — Plex uses its own auth.
+plex.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy 192.168.1.6:32400
+}
