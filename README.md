@@ -35,23 +35,20 @@ mkdir -p "${DOCKER_DATA_HOME}" "${DOCKER_SHARED_HOME}"
 
 ### 2. Start Portainer
 
-Portainer is not managed as a stack — run it directly:
+Portainer is not managed as a GitOps stack — run it directly via Compose:
 
 ```bash
-docker run -d \
-  -p 127.0.0.1:9443:9443 \
-  --name portainer \
-  --restart=unless-stopped \
-  --security-opt no-new-privileges:true \
-  --cap-drop ALL \
-  --memory 512m \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data \
-  portainer/portainer-ce:2.27.3 \
-  --trusted-origins https://portainer.longie.net
+DOCKER_DATA_HOME="${HOME}/Documents/docker/data" \
+  docker compose -f stacks/portainer/docker-compose.yml up -d
 ```
 
 Access at `https://portainer.longie.net` (LAN only — routed via Caddy reverse proxy).
+
+> **To upgrade Portainer:** pull the new image, stop and recreate the container:
+> ```bash
+> docker compose -f stacks/portainer/docker-compose.yml pull
+> docker compose -f stacks/portainer/docker-compose.yml up -d
+> ```
 
 ### 3. Wire each stack to GitOps in Portainer
 
