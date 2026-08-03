@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: slothcroissant/caddy-cloudflaredns:latest
+    image: slothcroissant/caddy-cloudflaredns:2.11.4
     container_name: caddy
     restart: unless-stopped
     ports:
@@ -22,6 +22,8 @@ services:
     cap_add:
       - NET_BIND_SERVICE
     mem_limit: 256m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     environment:
       CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
 
@@ -87,6 +89,7 @@ configs:
               Referrer-Policy "strict-origin-when-cross-origin"
               Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
               X-XSS-Protection "1; mode=block"
+              Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'self'"
               -Server
               -X-Powered-By
           }
