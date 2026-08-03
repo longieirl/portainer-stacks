@@ -10,8 +10,17 @@ services:
       - ${DOCKER_DATA_HOME}/sonarr/config:/config
       - ${DOCKER_SHARED_HOME}/downloads:/downloads
     ports:
-      - 8989:8989
+      - 192.168.1.6:8989:8989
+    networks:
+      - proxy_net
     security_opt:
       - no-new-privileges:true
+    cap_drop:
+      - ALL
     mem_limit: 512m
     restart: unless-stopped
+
+networks:
+  proxy_net:
+    name: proxy_net
+    external: true

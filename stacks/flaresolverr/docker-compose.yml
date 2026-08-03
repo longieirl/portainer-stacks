@@ -8,4 +8,9 @@ services:
       - TZ=Europe/Dublin
     # ports:
     #   - 8191:8191
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 512m
     restart: unless-stopped

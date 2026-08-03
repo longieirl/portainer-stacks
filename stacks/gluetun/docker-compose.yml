@@ -33,5 +33,4 @@ services:
       - 127.0.0.1:6881:6881       # QB
       - 127.0.0.1:6881:6881/udp   # QB
       - 192.168.1.6:9117:9117     # Jackett — LAN only via Caddy
-      - 192.168.1.6:58846:58846   # Deluge daemon
     mem_limit: 256m
