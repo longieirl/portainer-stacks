@@ -41,10 +41,13 @@ Portainer is not managed as a stack — run it directly:
 docker run -d \
   -p 127.0.0.1:9443:9443 \
   --name portainer \
-  --restart=always \
+  --restart=unless-stopped \
+  --security-opt no-new-privileges:true \
+  --cap-drop ALL \
+  --memory 512m \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v portainer_data:/data \
-  portainer/portainer-ce:latest \
+  portainer/portainer-ce:2.27.3 \
   --trusted-origins https://portainer.longie.net
 ```
 
@@ -61,7 +64,7 @@ Delete the existing stack, then Stacks → **+ Add stack** → **Repository**:
 | Compose path | `stacks/<stack-name>/docker-compose.yml` |
 | Authentication | Username + PAT |
 | Username | `longieirl` |
-| Token | github.com PAT with `repo` scope (starts with `ghp_` or `github_pat_`) |
+| Token | Fine-grained PAT: Contents=Read-only, this repo only (do NOT use `repo` scope) |
 | GitOps updates mechanism | **Polling** (NOT Webhook — see note above) |
 | Polling interval | `24h` |
 | Re-pull image | OFF (Watchtower handles image updates) |

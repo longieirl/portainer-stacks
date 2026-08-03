@@ -8,4 +8,11 @@ services:
       - TZ=Europe/Dublin
     # ports:
     #   - 8191:8191
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_ADMIN  # required for Chromium internal sandbox
+    mem_limit: 512m
     restart: unless-stopped
