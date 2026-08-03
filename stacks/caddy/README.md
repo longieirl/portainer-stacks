@@ -127,6 +127,22 @@ done
 
 Expected: first 5 lines `302` (Portainer redirects unauthenticated requests), subsequent lines `429 Too Many Requests`.
 
+Use the automated script for all three endpoints at once:
+
+```bash
+bash scripts/test-waf-ratelimit.sh
+```
+
+## Verifying Cloudflare Access policies
+
+To confirm CF Access gates are active for all protected hostnames (run from outside LAN):
+
+```bash
+bash scripts/verify-cf-access.sh
+```
+
+Also verify manually in Cloudflare Zero Trust → Access → Applications that each hostname has an active policy scoped to your GitHub account.
+
 ## Adding more services via tunnel
 
 1. Create Cloudflare Access application for the new hostname — **do this first**
