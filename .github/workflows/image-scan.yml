@@ -1,0 +1,39 @@
+name: Image security scan
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # weekly Monday 6am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    name: Trivy scan — ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: docker.n8n.io/n8nio/n8n:stable
+            label: n8n
+          - image: slothcroissant/caddy-cloudflaredns:2.11.4
+            label: caddy
+
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8  # v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          format: sarif
+          output: trivy-${{ matrix.label }}.sarif
+          severity: HIGH,CRITICAL
+          exit-code: '0'  # don't fail build — findings surface in Security tab
+
+      - name: Upload Trivy SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@18420e3271f74589575af831a523c833acda327f  # codeql-bundle-v2.26.2
+        with:
+          sarif_file: trivy-${{ matrix.label }}.sarif
+          category: trivy-${{ matrix.label }}
