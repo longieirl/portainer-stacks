@@ -17,8 +17,7 @@ check_access() {
   code=$(curl -s -o /dev/null -w "%{http_code}" \
     --max-time 10 \
     -L \
-    "${url}" 2>/dev/null)
-  code="${code:-000}"
+    "${url}" 2>/dev/null) || code="000"
 
   if [ "$expect_blocked" = "true" ]; then
     # CF Access redirects to login or returns 403 — never 200 straight through
