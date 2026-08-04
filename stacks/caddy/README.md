@@ -12,7 +12,7 @@ Also hosts the `cloudflared` container for Cloudflare Tunnel remote access.
 | `https://sonarr.longie.net` | `192.168.1.6:8989` | LAN + Tunnel (GitHub OAuth) |
 | `https://n8n.longie.net` | `n8n:5678` (remote-access net) | Tunnel only (GitHub OAuth) |
 | `https://jackett.longie.net` | `192.168.1.6:9117` | LAN only |
-| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN only |
+| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN + Tunnel (GitHub OAuth) |
 | `https://deluge.longie.net` | `192.168.1.6:8112` | LAN only |
 
 ## Networks

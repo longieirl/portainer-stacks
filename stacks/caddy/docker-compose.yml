@@ -126,6 +126,10 @@ configs:
           reverse_proxy 192.168.1.6:32400
       }
 
+      http://qbt.longie.net {
+          reverse_proxy 192.168.1.6:8080
+      }
+
       portainer.longie.net {
           import block_scanners
           import security_headers
