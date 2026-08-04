@@ -52,6 +52,7 @@ configs:
           auto_https disable_redirects
           servers {
               trusted_proxies static private_ranges
+              protocols h1 h2
           }
           log {
               output file /data/caddy-access.log {
