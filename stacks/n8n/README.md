@@ -73,3 +73,44 @@ docker logs caddy
 docker exec n8n n8n user-management:reset
 ```
 Resets the owner account — you'll be prompted to create a new one on next login. Workflows and data stay intact.
+
+## Webhook security
+
+`n8n.longie.net/webhook/*` is bypassed in Cloudflare Access — these paths are publicly reachable without GitHub OAuth. Each webhook that accepts external calls must validate the request source at the application level.
+
+### GitHub webhooks — HMAC signature validation
+
+Add a **Code** node as the first node in any GitHub-triggered workflow:
+
+```javascript
+const crypto = require('crypto');
+
+const secret = $env.GITHUB_WEBHOOK_SECRET;
+const payload = JSON.stringify($input.first().json);
+const signature = $input.first().headers['x-hub-signature-256'];
+
+if (!signature) throw new Error('Missing X-Hub-Signature-256 header');
+
+const expected = 'sha256=' + crypto
+  .createHmac('sha256', secret)
+  .update(payload)
+  .digest('hex');
+
+if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+  throw new Error('Invalid signature — request rejected');
+}
+
+return $input.all();
+```
+
+Set `GITHUB_WEBHOOK_SECRET` in Portainer UI → n8n stack → Environment variables (generate with `openssl rand -hex 32`). Set the same value in GitHub: repo → Settings → Webhooks → your webhook → Secret.
+
+### Generic webhooks
+
+In the n8n Webhook trigger node: Authentication → Header Auth → Header name: `X-Webhook-Secret` → Value: a random secret stored in Portainer env.
+
+### Audit checklist
+
+- [ ] Every workflow with a Webhook trigger node has signature validation as first node
+- [ ] `/webhook-test/*` bypass removed from Cloudflare Access policy when not actively developing
+- [ ] Each webhook secret stored in Portainer UI (never in git)
