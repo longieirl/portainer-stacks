@@ -103,31 +103,8 @@ configs:
           }
       }
 
-      # http:// blocks handle tunnel traffic (cloudflared → http://caddy:80).
-      http://portainer.longie.net {
-          reverse_proxy 192.168.1.6:9443 {
-              header_up Host portainer.longie.net
-              header_up Origin https://portainer.longie.net
-              transport http {
-                  tls_insecure_skip_verify
-              }
-          }
-      }
-
-      http://sonarr.longie.net {
-          reverse_proxy 192.168.1.6:8989
-      }
-
       http://n8n.longie.net {
           reverse_proxy n8n:5678
-      }
-
-      http://plex.longie.net {
-          reverse_proxy 192.168.1.6:32400
-      }
-
-      http://qbt.longie.net {
-          reverse_proxy 192.168.1.6:8080
       }
 
       portainer.longie.net {
@@ -180,13 +157,6 @@ configs:
           reverse_proxy n8n:5678
       }
 
-      # NOTE: CF Access bypassed for plex.longie.net — Plex uses its own auth.
-      plex.longie.net {
-          import block_scanners
-          import security_headers
-          import body_limit
-          reverse_proxy 192.168.1.6:32400
-      }
     # yamllint enable rule:line-length
 
 networks:
