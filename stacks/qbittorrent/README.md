@@ -2,17 +2,15 @@
 
 Torrent client. Routes all traffic through gluetun VPN (`network_mode: container:gluetun`). **gluetun must be running first.**
 
-WebUI at `https://192.168.1.6:8080` — HTTPS terminated by Caddy. Port 8080 is no longer published directly on the host.
+WebUI at `https://qbt.longie.net` (LAN/Tailscale via Caddy) or directly at `http://192.168.1.6:8080`.
 
 ## Architecture
 
-qBittorrent shares gluetun's network namespace (`network_mode: container:gluetun`). It has no independent network interface. Caddy reaches it via the gluetun container on `proxy_net`:
+qBittorrent shares gluetun's network namespace (`network_mode: container:gluetun`). It has no independent network interface. Gluetun publishes port `192.168.1.6:8080` on the host; Caddy proxies `qbt.longie.net` to that port.
 
 ```
-Browser → Caddy :8080 (HTTPS) → gluetun:8080 → qbittorrent:8080
+Browser → Caddy :443 (HTTPS) → 192.168.1.6:8080 → gluetun:8080 → qbittorrent:8080
 ```
-
-gluetun joins `proxy_net` so Caddy can reach it. Port 8080 is removed from gluetun's host port mappings — WebUI is only accessible via Caddy.
 
 ## First-time login
 
@@ -39,15 +37,15 @@ docker ps | grep gluetun
 ```
 qbittorrent has no network without it.
 
-**2. WebUI accessible over HTTPS:**
+**2. WebUI accessible:**
 
-Open `https://192.168.1.6:8080` — should reach the qbittorrent login screen. See the Caddy stack README for CA trust setup if the browser shows a certificate warning.
+Open `https://qbt.longie.net` or `http://192.168.1.6:8080` — should reach the qBittorrent login screen.
 
-**3. No direct HTTP access (expected to fail):**
+**3. Direct HTTP access works (LAN only):**
 ```bash
-curl http://192.168.1.6:8080
+curl -s -o /dev/null -w "%{http_code}" http://192.168.1.6:8080
 ```
-Expected: connection refused. Port 8080 is no longer published on the host.
+Expected: `200` or redirect — port 8080 is published on the host via gluetun.
 
 **4. Downloads path:**
 

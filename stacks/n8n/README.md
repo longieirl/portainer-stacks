@@ -1,31 +1,30 @@
 # n8n
 
-Workflow automation. Backed by Postgres 16. Accessible at `https://192.168.1.6`.
+Workflow automation. Backed by Postgres 16. Accessible at `https://n8n.longie.net`.
 
 ## Architecture
 
 n8n runs on two networks:
 
 - `n8n_net` — internal only; Postgres↔n8n communication, not reachable from outside
-- `proxy_net` — shared external network; Caddy can reach n8n by container name
+- `remote-access` — shared external network; Caddy can reach n8n by container name
 
-A dedicated **Caddy stack** sits in front of all proxied services. It terminates TLS and proxies traffic to n8n on port 5678 over the internal Docker network.
+A dedicated **Caddy stack** sits in front, terminating TLS and proxying traffic to n8n on port 5678. n8n is internet-facing via Cloudflare Tunnel — Cloudflare Access enforces authentication at the edge.
 
 ```
-Browser → Caddy :443 (HTTPS, tls internal) → n8n:5678 (proxy_net)
-                                                       ↓
-                                             postgres:5432 (n8n_net, internal only)
+Internet → Cloudflare Tunnel → Caddy :443 → n8n:5678 (remote-access net)
+                                                      ↓
+                                            postgres:5432 (n8n_net, internal only)
 ```
 
-**Why this approach instead of plain HTTP or native n8n SSL?**
+**Why this approach instead of plain HTTP?**
 
 - n8n stores OAuth tokens, API keys, and webhook secrets. These travel with every request — plain HTTP exposes them to anyone on the LAN who can sniff traffic.
-- `N8N_SECURE_COOKIE=true` (required to protect session cookies from interception) only works over HTTPS. Without it, sessions can be hijacked on the local network.
-- Caddy's `tls internal` generates a local CA automatically — no manual cert creation, no renewal management.
-- Sharing one Caddy instance across stacks (n8n, Sonarr) is simpler than running a proxy per service.
-- PostgreSQL has no host port — it is only reachable within `n8n_net`, which is correct.
+- `N8N_SECURE_COOKIE=true` (required to protect session cookies from interception) only works over HTTPS.
+- Cloudflare Access + Tunnel means zero open ports on the host for n8n — no direct inbound connections.
+- PostgreSQL has no host port — only reachable within `n8n_net`, which is correct.
 
-> **Deploy Caddy first.** The `proxy_net` network is owned by the caddy stack. n8n and Sonarr declare it as `external: true` and will fail to start if it doesn't exist yet.
+> **Deploy Caddy first.** The `remote-access` network is owned by the caddy stack. n8n will fail to start if it doesn't exist yet.
 
 ## Required secrets
 
@@ -52,9 +51,9 @@ docker exec n8n-postgres pg_isready -U n8n -d n8n
 ```
 Expected: `n8n:5432 - accepting connections`
 
-**3. n8n UI loads over HTTPS:**
+**3. n8n UI loads:**
 
-Open `https://192.168.1.6` — should reach the n8n login screen. See the Caddy stack README for CA trust setup.
+Open `https://n8n.longie.net` — should reach the n8n login screen.
 
 **4. Encryption key correct:**
 

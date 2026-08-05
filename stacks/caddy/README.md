@@ -8,16 +8,16 @@ Also hosts the `cloudflared` container for Cloudflare Tunnel remote access.
 
 | URL | Backend | Access |
 |---|---|---|
-| `https://portainer.longie.net` | `192.168.1.6:9443` (TLS) | LAN + Tunnel (GitHub OAuth) |
-| `https://sonarr.longie.net` | `192.168.1.6:8989` | LAN + Tunnel (GitHub OAuth) |
-| `https://n8n.longie.net` | `n8n:5678` (remote-access net) | Tunnel only (GitHub OAuth) |
-| `https://jackett.longie.net` | `192.168.1.6:9117` | LAN only |
-| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN + Tunnel (GitHub OAuth) |
-| `https://deluge.longie.net` | `192.168.1.6:8112` | LAN only |
+| `https://portainer.longie.net` | `192.168.1.6:9443` (TLS) | LAN/Tailscale |
+| `https://sonarr.longie.net` | `192.168.1.6:8989` | LAN/Tailscale |
+| `https://n8n.longie.net` | `n8n:5678` (remote-access net) | Internet — Cloudflare Tunnel + Access |
+| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN/Tailscale |
+
+Jackett (`192.168.1.6:9117`) and Deluge (`192.168.1.6:8112`) are **not** proxied by Caddy — access directly on LAN.
 
 ## Networks
 
-- `proxy_net` — connects Caddy and cloudflared; LAN IP routing for portainer/sonarr
+- `proxy_net` — connects Caddy to Sonarr; LAN IP routing for portainer/qbt via gluetun host ports
 - `remote-access` — connects Caddy to n8n container by name; external network, pre-created
 
 ## Required environment variables

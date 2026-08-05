@@ -127,25 +127,11 @@ configs:
           reverse_proxy 192.168.1.6:8989
       }
 
-      jackett.longie.net {
-          import block_scanners
-          import security_headers
-          import body_limit
-          reverse_proxy 192.168.1.6:9117
-      }
-
       qbt.longie.net {
           import block_scanners
           import security_headers
           import body_limit
           reverse_proxy 192.168.1.6:8080
-      }
-
-      deluge.longie.net {
-          import block_scanners
-          import security_headers
-          import body_limit
-          reverse_proxy 192.168.1.6:8112
       }
 
       # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
