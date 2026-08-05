@@ -35,11 +35,11 @@ services:
       - 192.168.1.6:9117:9117     # Jackett — LAN direct only
     mem_limit: 256m
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/v1/vpnstatus"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      interval: 5s
+      timeout: 5s
       retries: 3
-      start_period: 30s
+      start_period: 10s
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
