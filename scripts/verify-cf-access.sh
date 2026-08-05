@@ -68,20 +68,17 @@ check_access "portainer.longie.net" "https://portainer.longie.net"
 check_access "sonarr.longie.net"    "https://sonarr.longie.net"
 check_access "n8n.longie.net"       "https://n8n.longie.net"
 check_access "qbt.longie.net"       "https://qbt.longie.net"
-check_access "deluge.longie.net"    "https://deluge.longie.net"
-check_access "jackett.longie.net"   "https://jackett.longie.net"
 
 echo ""
 echo "=== Bypass paths (public — CF Access intentionally bypassed) ==="
-check_access "plex.longie.net (PlexBypass)" "https://plex.longie.net" "false"
-check_access "n8n webhook path"             "https://n8n.longie.net/webhook/" "false"
+check_access "n8n webhook path" "https://n8n.longie.net/webhook/" "false"
 
 echo ""
 if [ "$PASS" = false ]; then
   echo "Result: FAIL — one or more hostnames returned 200 without authentication"
   echo "Check: Cloudflare Zero Trust → Access → Applications → verify policy is Enabled"
   exit 1
-elif [ "$WARN_COUNT" -gt 4 ]; then
+elif [ "$WARN_COUNT" -gt 3 ]; then
   echo "Result: INCONCLUSIVE — too many timeouts (${WARN_COUNT}) to validate"
   echo "Likely cause: network blocking HTTPS, tunnel down, or DNS not resolving."
   echo "  1. Check tunnel: Cloudflare Zero Trust → Tunnels → longie-caddy → status"
