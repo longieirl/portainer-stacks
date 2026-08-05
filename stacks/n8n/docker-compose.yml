@@ -53,6 +53,7 @@ services:
       N8N_HOST: "n8n.longie.net"
       N8N_PORT: "5678"
       WEBHOOK_URL: "https://n8n.longie.net"
+      N8N_PROXY_HOPS: "1"
     volumes:
       - ${DOCKER_DATA_HOME}/n8n_data:/home/node/.n8n
     networks:
