@@ -8,7 +8,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${DOCKER_DATA_HOME}/portainer:/data
-    command: --trusted-origins portainer.longie.net
+    command: --trusted-origins https://portainer.longie.net
     security_opt:
       - no-new-privileges:true
     cap_drop:
