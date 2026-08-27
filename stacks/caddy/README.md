@@ -53,20 +53,11 @@ docker exec caddy wget -q -O- http://n8n:5678 | head -3
 docker logs cloudflared-caddy --tail 5
 ```
 
-## Known issue: Portainer CSRF "origin invalid" via reverse proxy
+## Portainer CSRF "origin invalid" — resolved
 
-**Symptom:** Write operations (redeploy, pull, env changes) via `https://portainer.longie.net` fail with "Forbidden - origin invalid".
+`--trusted-origins https://portainer.longie.net` set in `stacks/portainer/docker-compose.yml` since Portainer 2.45.0.
 
-**Cause:** Portainer CE 2.39.4 CSRF validation compares the `Origin` header against `x_forwarded_proto://host`. Via Cloudflare Tunnel, Caddy receives plain HTTP so the scheme is `http`, and the upstream host leaks as `192.168.1.6:9443` — neither matches `portainer.longie.net`. The `--trusted-origins` flag is broken in CE 2.39.4 (crashes Portainer on startup).
-
-**Fix (already applied):** Both portainer Caddyfile blocks explicitly set:
-```
-header_up Host portainer.longie.net
-header_up Origin https://portainer.longie.net
-```
-
-**Upstream bug:** https://github.com/portainer/portainer/issues/12748
-**Local tracking:** https://github.com/longieirl/portainer-stacks/issues/38
+Ref: https://github.com/portainer/portainer/issues/12748
 
 ## Known issue: "Pull and redeploy" fails with `Failure [object Object]`
 
