@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - image: docker.n8n.io/n8nio/n8n:stable
+          - image: n8nio/n8n:stable
             label: n8n
           - image: slothcroissant/caddy-cloudflaredns:2.11.4
             label: caddy
