@@ -3,11 +3,7 @@ name: Docker security review
 on:
   push:
     branches: [main]
-    paths:
-      - 'stacks/**'
   pull_request:
-    paths:
-      - 'stacks/**'
 
 permissions:
   contents: read
