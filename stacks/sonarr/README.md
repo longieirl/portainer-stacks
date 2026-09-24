@@ -25,6 +25,15 @@ Set in Portainer UI → stack → Environment variables:
 | `DOCKER_DATA_HOME` | Host path for Sonarr config |
 | `DOCKER_SHARED_HOME` | Host path for shared downloads folder |
 
+## Post-deploy configuration
+
+**Allowed Hosts (required):** Sonarr will show a security warning until this is set.
+
+Settings > General > Security > Allowed Hosts:
+```
+sonarr.longie.net,192.168.1.6
+```
+
 ## Verify after deploy
 
 **1. Container running:**

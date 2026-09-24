@@ -1,0 +1,9 @@
+# CVE-2026-14456: OpenSSL DoS via unbounded memory growth in QUIC server
+# Unfixable in n8nio/n8n:stable — upstream OS dependency, no patch available yet
+# Risk: n8n is not a public-facing QUIC server; DoS vector not applicable here
+CVE-2026-14456
+
+# GHSA-p6gq-j5cr-w38f: Nodemailer arbitrary file read / SSRF via raw message option
+# Unfixable in n8nio/n8n:stable — upstream n8n dependency (nodemailer@8.0.10)
+# Risk: only exploitable if n8n workflows use raw Nodemailer option; acceptable until n8n patches
+GHSA-p6gq-j5cr-w38f
