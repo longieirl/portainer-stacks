@@ -1,0 +1,78 @@
+services:
+
+  tautulli:
+    image: ghcr.io/tautulli/tautulli:latest
+    container_name: tautulli
+    restart: unless-stopped
+    ports:
+      - "192.168.1.6:8181:8181"
+    volumes:
+      - ${DOCKER_DATA_HOME}/tautulli/config:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Dublin
+    networks:
+      - proxy_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 256m
+    cpus: "0.5"
+    pids_limit: 100
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8181/ > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    restart: unless-stopped
+    ports:
+      - "192.168.1.6:5055:5055"
+    volumes:
+      - ${DOCKER_DATA_HOME}/overseerr/config:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Dublin
+    networks:
+      - proxy_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 256m
+    cpus: "0.5"
+    pids_limit: 100
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5055/api/v1/status > /dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  proxy_net:
+    name: proxy_net
+    external: true

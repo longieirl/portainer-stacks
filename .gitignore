@@ -12,3 +12,6 @@ Thumbs.db
 
 docs/superpowers/
 docs/local/
+docs/handover-*.md
+docs/research-*.md
+docs/system-design*.md
