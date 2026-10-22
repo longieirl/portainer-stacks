@@ -15,15 +15,26 @@ Tautulli + Overseerr containers for monitoring and media requests against a nati
 - `proxy_net` network exists (created by the caddy stack)
 - `DOCKER_DATA_HOME` set in Portainer UI per-stack (Portainer CE has no global env injection)
 - Portainer stack name must be `plex` (folder name convention)
+- Cloudflare DNS A records exist for `tautulli.longie.net` and `overseerr.longie.net` pointing to the host IP
+- Caddy proxy entries added to `stacks/caddy/docker-compose.yml` (see below) and caddy stack redeployed
 
 ## Deployment
 
-Portainer → Stacks → Add Stack → name: `plex` → upload `docker-compose.yml`.
+Portainer → Stacks → **Add Stack** → name: `plex` → **Repository**:
+
+| Field | Value |
+|---|---|
+| Repository URL | `https://github.com/longieirl/portainer-stacks.git` |
+| Branch | `main` |
+| Compose path | `stacks/plex/docker-compose.yml` |
+| Authentication | Username + PAT |
+| GitOps updates mechanism | **Polling**, 24h |
 
 Set in Portainer UI (Environment Variables tab):
 
 | Variable | Value |
 |---|---|
+| `DOCKER_DATA_HOME` | `/Users/longie/Documents/docker/data` |
 | `PUID` | Output of `id -u` on host |
 | `PGID` | Output of `id -g` on host |
 

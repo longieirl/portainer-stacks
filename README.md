@@ -115,6 +115,33 @@ Stacks that also need secrets:
 
 gluetun **must be running** before starting deluge, jackett, or qbittorrent — all three use `network_mode: container:gluetun`.
 
+plex (tautulli + overseerr) requires caddy to be running — both containers join `proxy_net` which caddy creates.
+
+---
+
+## Adding a new Caddy-proxied service
+
+Every service accessible via a `*.longie.net` subdomain requires three steps:
+
+**1. Cloudflare DNS** — add an A record for the subdomain pointing to `192.168.1.6`. Without this the hostname won't resolve for LAN clients.
+
+**2. Caddyfile entry** — add a hostname block to `stacks/caddy/docker-compose.yml`:
+
+```
+yourservice.longie.net {
+    import block_scanners
+    import security_headers
+    import body_limit
+    reverse_proxy <container-name>:<port>
+}
+```
+
+Use the container name (not the host IP) — the container must be on `proxy_net`.
+
+**3. Caddy redeploy** — after merging the caddy compose change: Stacks → caddy → Pull and redeploy.
+
+Caddy handles TLS cert issuance automatically via DNS-01 challenge using `CLOUDFLARE_API_TOKEN`. No manual cert steps needed.
+
 ---
 
 ## Known host port conflicts (macOS)
