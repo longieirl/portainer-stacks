@@ -51,7 +51,7 @@ Never push directly to `main`. Always work on a branch. PRs required — CODEOWN
 - `.env.example` per stack documents all required vars
 - `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` must be set in Portainer UI for every stack at creation/redeploy time (CE has no global env var injection)
 - `stack.env` files must not be committed — they would expose host paths when repo goes public
-- Portainer is started manually via `docker run` (see README) — it is not a managed stack
+- Portainer is managed via `docker compose -f stacks/portainer/docker-compose.yml up -d` — it is not managed by Portainer itself (that would be circular)
 - Never use `privileged: true` unless strictly required and documented why
 - gluetun must be running before deluge, jackett, and qbittorrent (all use `network_mode: container:gluetun`)
 - GitOps-managed stacks have **no compose editor** in Portainer CE UI — compose is locked to git; all changes go through git + PR. To force-redeploy immediately (e.g. after port mapping changes): Stacks → stack name → "Pull and redeploy"
