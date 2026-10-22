@@ -78,3 +78,5 @@ graph TB
 | Overseerr | `https://overseerr.longie.net` | LAN/Tailscale — Caddy reverse proxy |
 | Jackett | `http://192.168.1.6:9117` | LAN direct — no Caddy |
 | Deluge | `http://192.168.1.6:8112` | LAN direct — no Caddy |
+
+> **Adding a new Caddy-proxied service:** every service behind Caddy requires (1) a Cloudflare DNS A record pointing to `192.168.1.6` and (2) a hostname block in the `stacks/caddy/docker-compose.yml` Caddyfile. Caddy handles TLS cert issuance automatically via DNS-01 challenge using the `CLOUDFLARE_API_TOKEN`. After updating the caddy compose, trigger a redeploy: Stacks → caddy → Pull and redeploy.
