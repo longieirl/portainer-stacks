@@ -18,73 +18,7 @@ GitOps-managed Docker Compose stacks for Portainer.
 
 ## Architecture
 
-```mermaid
-graph TB
-    subgraph INTERNET["☁️ Internet"]
-        CF["Cloudflare\nDNS + Access"]
-    end
-
-    subgraph HOST["🖥️ macOS Host — 192.168.1.6 (Tailscale: 100.103.88.27)"]
-        subgraph REMOTE_ACCESS["remote-access network"]
-            CADDY["Caddy\nreverse proxy + TLS\nports 80/443"]
-            N8N["n8n :5678"]
-        end
-
-        subgraph N8N_NET["n8n_net (internal)"]
-            PG["postgres:16"]
-        end
-
-        subgraph PROXY_NET["proxy_net (bridge)"]
-            SONARR["Sonarr :8989"]
-        end
-
-        subgraph VPN_NET["gluetun — Surfshark WireGuard VPN\n(network_mode: container:gluetun)"]
-            GLUETUN["gluetun"]
-            QB["qBittorrent :8080"]
-            DELUGE["Deluge :8112\nLAN direct only"]
-            JACKETT["Jackett :9117\nLAN direct only"]
-            FLARE["FlareSolverr :8191"]
-        end
-
-        PORTAINER["Portainer CE :9443"]
-        WATCHTOWER["Watchtower\nnightly 04:00"]
-    end
-
-    subgraph CF_TUNNEL["Cloudflare Tunnel (in caddy stack)"]
-        CLOUDFLARED["cloudflared sidecar"]
-    end
-
-    %% Internet → n8n via Cloudflare Tunnel
-    CF -- "n8n.longie.net\n(Cloudflare Access enforced)" --> CLOUDFLARED
-    CLOUDFLARED --> N8N
-
-    %% Tailscale/LAN via Caddy
-    CF -. "DNS only" .-> CADDY
-    CADDY -- "portainer.longie.net" --> PORTAINER
-    CADDY -- "sonarr.longie.net" --> SONARR
-    CADDY -- "qbt.longie.net" --> QB
-    CADDY -- "n8n.longie.net (LAN)" --> N8N
-
-    %% n8n ↔ DB
-    N8N --- PG
-
-    %% VPN grouping
-    GLUETUN -. "VPN tunnel" .-> QB
-    GLUETUN -. "VPN tunnel" .-> DELUGE
-    GLUETUN -. "VPN tunnel" .-> JACKETT
-    GLUETUN -. "VPN tunnel" .-> FLARE
-```
-
-**Access summary:**
-
-| Service | URL | Access path |
-|---|---|---|
-| n8n | `https://n8n.longie.net` | Internet — Cloudflare Tunnel + Access |
-| Portainer | `https://portainer.longie.net` | LAN/Tailscale — Caddy reverse proxy |
-| Sonarr | `https://sonarr.longie.net` | LAN/Tailscale — Caddy reverse proxy |
-| qBittorrent | `https://qbt.longie.net` | LAN/Tailscale — Caddy reverse proxy |
-| Jackett | `http://192.168.1.6:9117` | LAN direct — no Caddy |
-| Deluge | `http://192.168.1.6:8112` | LAN direct — no Caddy |
+See [docs/architecture.md](docs/architecture.md) for the full network diagram and service access summary.
 
 ---
 
@@ -160,10 +94,11 @@ Stacks that also need secrets:
 | `gluetun` | `WIREGUARD_PRIVATE_KEY` |
 | `n8n` | `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY`, `CLOUDFLARE_TUNNEL_TOKEN` |
 | `caddy` | `CLOUDFLARE_API_TOKEN` |
+| `plex` | `PUID`, `PGID` |
 
 ### 5. Verify end-to-end
 
-- [ ] All 8 stacks running in Portainer: gluetun, deluge, jackett, qbittorrent, sonarr, n8n, caddy, watchtower
+- [ ] All 10 stacks running in Portainer: gluetun, deluge, flaresolverr, jackett, qbittorrent, sonarr, n8n, caddy, watchtower, plex
 - [ ] Each stack shows GitOps source pointing to this repo
 - [ ] Each stack has polling set to 24h
 - [ ] `DOCKER_DATA_HOME` and `DOCKER_SHARED_HOME` set in each stack's Environment Variables tab
@@ -207,12 +142,6 @@ export DOCKER_SHARED_HOME="${HOME}/Documents/docker/shared"
 ```
 
 Or run the setup script: `bash scripts/setup-env.sh`
-
----
-
-## Research & candidate services
-
-- [Candidate self-hosted services](docs/research-candidate-services.md) — Pi-hole, Home Assistant, Frigate, Mealie, Paperless-ngx, Homebox, Scrutiny
 
 ---
 
