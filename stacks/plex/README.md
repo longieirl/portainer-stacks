@@ -34,7 +34,7 @@ Set in Portainer UI (Environment Variables tab):
 
 | Variable | Value |
 |---|---|
-| `DOCKER_DATA_HOME` | `/Users/longie/Documents/docker/data` |
+| `DOCKER_DATA_HOME` | Your host `$DOCKER_DATA_HOME` value (see repo README setup step 1) |
 | `PUID` | Output of `id -u` on host |
 | `PGID` | Output of `id -g` on host |
 

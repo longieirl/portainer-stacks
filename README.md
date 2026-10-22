@@ -84,8 +84,8 @@ When creating or redeploying each stack, add the following environment variables
 
 | Variable | Value |
 |---|---|
-| `DOCKER_DATA_HOME` | `/Users/longie/Documents/docker/data` |
-| `DOCKER_SHARED_HOME` | `/Users/longie/Documents/docker/shared` |
+| `DOCKER_DATA_HOME` | Your `$DOCKER_DATA_HOME` from `~/.zshrc` |
+| `DOCKER_SHARED_HOME` | Your `$DOCKER_SHARED_HOME` from `~/.zshrc` |
 
 Stacks that also need secrets:
 
