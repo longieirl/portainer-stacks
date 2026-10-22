@@ -210,6 +210,12 @@ Or run the setup script: `bash scripts/setup-env.sh`
 
 ---
 
+## Research & candidate services
+
+- [Candidate self-hosted services](docs/research-candidate-services.md) — Pi-hole, Home Assistant, Frigate, Mealie, Paperless-ngx, Homebox, Scrutiny
+
+---
+
 ## License
 
 [MIT](LICENSE)

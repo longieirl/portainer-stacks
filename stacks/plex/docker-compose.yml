@@ -1,0 +1,62 @@
+services:
+
+  tautulli:
+    image: ghcr.io/tautulli/tautulli:latest
+    container_name: tautulli
+    restart: unless-stopped
+    ports:
+      - "192.168.1.6:8181:8181"
+    volumes:
+      - ${DOCKER_DATA_HOME}/tautulli/config:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Dublin
+    networks:
+      - proxy_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 256m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:latest
+    container_name: overseerr
+    restart: unless-stopped
+    ports:
+      - "192.168.1.6:5055:5055"
+    volumes:
+      - ${DOCKER_DATA_HOME}/overseerr/config:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=Europe/Dublin
+    networks:
+      - proxy_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 256m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  proxy_net:
+    name: proxy_net
+    external: true
