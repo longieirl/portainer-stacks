@@ -18,7 +18,7 @@ GitOps-managed Docker Compose stacks for Portainer.
 
 ## Architecture
 
-See [docs/architecture.md](docs/architecture.md) for the full network diagram and service access summary.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full network diagram and service access summary.
 
 ---
 
