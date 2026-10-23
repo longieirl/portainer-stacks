@@ -1,0 +1,15 @@
+---
+title: Longie Home
+theme: dark
+color: slate
+headerStyle: boxed
+layout:
+  Media:
+    columns: 4
+    style: row
+  Downloads:
+    columns: 2
+    style: row
+  Infrastructure:
+    columns: 2
+    style: row
