@@ -141,11 +141,11 @@ configs:
           reverse_proxy tautulli:8181
       }
 
-      overseerr.longie.net {
+      seerr.longie.net {
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy overseerr:5055
+          reverse_proxy seerr:5055
       }
 
       # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
