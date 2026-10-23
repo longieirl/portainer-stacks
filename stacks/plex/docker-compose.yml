@@ -36,17 +36,16 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
     restart: unless-stopped
     ports:
       - "192.168.1.6:5055:5055"
     volumes:
-      - ${DOCKER_DATA_HOME}/overseerr/config:/config
+      - ${DOCKER_DATA_HOME}/overseerr/config:/app/config
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - TZ=Europe/Dublin
     networks:
       - proxy_net
@@ -56,10 +55,6 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
-    cap_add:
-      - CHOWN
-      - SETUID
-      - SETGID
     mem_limit: 256m
     cpus: "0.5"
     pids_limit: 100
