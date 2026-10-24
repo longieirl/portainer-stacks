@@ -27,6 +27,7 @@ services:
       - HOMEPAGE_VAR_SEERR_API_KEY=${SEERR_API_KEY}
       - HOMEPAGE_VAR_QBIT_USERNAME=${QBIT_USERNAME}
       - HOMEPAGE_VAR_QBIT_PASSWORD=${QBIT_PASSWORD}
+      - HOMEPAGE_VAR_DELUGE_PASSWORD=${DELUGE_PASSWORD}
     networks:
       - proxy_net
     extra_hosts:
@@ -103,6 +104,14 @@ configs:
                 url: http://192.168.1.6:8080
                 username: "{{HOMEPAGE_VAR_QBIT_USERNAME}}"
                 password: "{{HOMEPAGE_VAR_QBIT_PASSWORD}}"
+          - Deluge:
+              href: http://192.168.1.6:8112
+              description: Torrent client
+              icon: deluge.png
+              widget:
+                type: deluge
+                url: http://192.168.1.6:8112
+                password: "{{HOMEPAGE_VAR_DELUGE_PASSWORD}}"
           - Jackett:
               href: http://192.168.1.6:9117
               description: Torrent indexer proxy
