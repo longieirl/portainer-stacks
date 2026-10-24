@@ -33,6 +33,7 @@ services:
       - 127.0.0.1:6881:6881       # QB
       - 127.0.0.1:6881:6881/udp   # QB
       - 192.168.1.6:9117:9117     # Jackett — LAN direct only
+      - 192.168.1.6:9696:9696     # Prowlarr — LAN direct only
     mem_limit: 256m
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
@@ -110,6 +111,30 @@ services:
     volumes:
       - ${DOCKER_DATA_HOME}/jackett/config:/config
       - ${DOCKER_SHARED_HOME}/downloads:/downloads
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 512m
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "container:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+    volumes:
+      - ${DOCKER_DATA_HOME}/prowlarr/config:/config
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true

@@ -134,6 +134,13 @@ configs:
           reverse_proxy 192.168.1.6:8080
       }
 
+      prowlarr.longie.net {
+          import block_scanners
+          import security_headers
+          import body_limit
+          reverse_proxy 192.168.1.6:9696
+      }
+
       tautulli.longie.net {
           import block_scanners
           import security_headers
@@ -157,6 +164,13 @@ configs:
           import security_headers
           import body_limit
           reverse_proxy homepage:3000
+      }
+
+      uptime.longie.net {
+          import block_scanners
+          import security_headers
+          import body_limit
+          reverse_proxy uptime-kuma:3001
       }
 
       # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.

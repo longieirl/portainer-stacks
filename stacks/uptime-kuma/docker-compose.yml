@@ -1,0 +1,23 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_DATA_HOME}/uptime-kuma:/app/data
+    networks:
+      - proxy_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    mem_limit: 256m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  proxy_net:
+    name: proxy_net
+    external: true

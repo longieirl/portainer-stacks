@@ -1,0 +1,23 @@
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "container:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+    volumes:
+      - ${DOCKER_DATA_HOME}/prowlarr/config:/config
+    # ports:
+    #   - 9696:9696
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    mem_limit: 512m
