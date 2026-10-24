@@ -126,6 +126,32 @@ configs:
               href: https://n8n.longie.net
               description: Workflow automation
               icon: n8n.png
+
+      - System:
+          - CPU:
+              icon: glances.png
+              description: Processor
+              widget:
+                type: glances
+                url: http://host.docker.internal:61208
+                metric: cpu
+                version: 4
+          - Memory:
+              icon: glances.png
+              description: RAM
+              widget:
+                type: glances
+                url: http://host.docker.internal:61208
+                metric: memory
+                version: 4
+          - Disk:
+              icon: glances.png
+              description: Storage
+              widget:
+                type: glances
+                url: http://host.docker.internal:61208
+                metric: disk
+                version: 4
     # yamllint enable rule:line-length
 
   homepage_settings:
@@ -144,6 +170,9 @@ configs:
           style: row
         Infrastructure:
           columns: 2
+          style: row
+        System:
+          columns: 3
           style: row
 
   homepage_widgets:
