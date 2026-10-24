@@ -32,3 +32,41 @@ docker ps | grep portainer
 **2. UI accessible:**
 
 Open `https://portainer.longie.net` — should reach the Portainer login screen.
+
+## Upgrading Portainer
+
+Portainer pins an explicit version tag — Watchtower is disabled for this container. Steps to upgrade:
+
+**1. Update the version in compose**
+
+Edit `stacks/portainer/docker-compose.yml`, bump `image: portainer/portainer-ce:<version>`, open a PR, merge to main.
+
+**2. Pull the repo on the host**
+
+```bash
+cd /path/to/portainer-stacks
+git pull
+```
+
+**3. Recreate the container**
+
+Run from the repo root:
+
+```bash
+DOCKER_DATA_HOME="${HOME}/Documents/docker/data" \
+  docker compose -f stacks/portainer/docker-compose.yml pull
+
+DOCKER_DATA_HOME="${HOME}/Documents/docker/data" \
+  docker compose -f stacks/portainer/docker-compose.yml up -d
+```
+
+**4. Verify**
+
+```bash
+docker ps | grep portainer   # should show new version tag
+docker logs portainer --tail 5
+```
+
+Open `https://portainer.longie.net` — Portainer logs a migration line if the DB was upgraded.
+
+> **macOS Docker Desktop note:** `ports: - 9443:9443` without an explicit host IP binds to `127.0.0.1` only, blocking LAN access. The compose uses `192.168.1.6:9443:9443` to avoid this — do not change it to the short form.

@@ -50,11 +50,7 @@ DOCKER_DATA_HOME="${HOME}/Documents/docker/data" \
 
 Access at `https://portainer.longie.net` (LAN only — routed via Caddy reverse proxy).
 
-> **To upgrade Portainer:** pull the new image, stop and recreate the container:
-> ```bash
-> docker compose -f stacks/portainer/docker-compose.yml pull
-> docker compose -f stacks/portainer/docker-compose.yml up -d
-> ```
+> **To upgrade Portainer:** see `stacks/portainer/README.md` — Upgrading Portainer.
 
 ### 3. Wire each stack to GitOps in Portainer
 
