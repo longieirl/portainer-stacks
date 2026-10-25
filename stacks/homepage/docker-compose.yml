@@ -28,6 +28,7 @@ services:
       - HOMEPAGE_VAR_QBIT_USERNAME=${QBIT_USERNAME}
       - HOMEPAGE_VAR_QBIT_PASSWORD=${QBIT_PASSWORD}
       - HOMEPAGE_VAR_DELUGE_PASSWORD=${DELUGE_PASSWORD}
+      - HOMEPAGE_VAR_PROWLARR_API_KEY=${PROWLARR_API_KEY}
     networks:
       - proxy_net
     extra_hosts:
@@ -112,6 +113,15 @@ configs:
                 type: deluge
                 url: http://192.168.1.6:8112
                 password: "{{HOMEPAGE_VAR_DELUGE_PASSWORD}}"
+          - Prowlarr:
+              href: https://prowlarr.longie.net
+              description: Indexer manager
+              icon: prowlarr.png
+              widget:
+                type: prowlarr
+                url: http://prowlarr:9696
+                key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
+                fields: ["enabledIndexers", "numberOfGrabs", "numberOfFailGrabs"]
           - Jackett:
               href: http://192.168.1.6:9117
               description: Torrent indexer proxy
@@ -126,6 +136,10 @@ configs:
               href: https://n8n.longie.net
               description: Workflow automation
               icon: n8n.png
+          - Uptime Kuma:
+              href: https://uptime.longie.net
+              description: Uptime monitoring
+              icon: uptime-kuma.png
 
       - System:
           - CPU:
@@ -150,7 +164,7 @@ configs:
               widget:
                 type: glances
                 url: http://host.docker.internal:61208
-                metric: disk
+                metric: disk:disk0
                 version: 4
           - Network:
               icon: glances.png
@@ -177,7 +191,7 @@ configs:
           columns: 2
           style: row
         Infrastructure:
-          columns: 2
+          columns: 3
           style: row
         System:
           columns: 4
