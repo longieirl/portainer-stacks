@@ -119,7 +119,7 @@ configs:
               icon: prowlarr.png
               widget:
                 type: prowlarr
-                url: http://host.docker.internal:9696
+                url: http://192.168.1.6:9696
                 key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
                 fields: ["enabledIndexers", "numberOfGrabs", "numberOfFailGrabs"]
           - Jackett:
