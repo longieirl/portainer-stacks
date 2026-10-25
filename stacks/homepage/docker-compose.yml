@@ -172,7 +172,7 @@ configs:
               widget:
                 type: glances
                 url: http://host.docker.internal:61208
-                metric: network:en0
+                metric: network:en9
                 version: 4
     # yamllint enable rule:line-length
 
