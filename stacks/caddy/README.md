@@ -6,12 +6,17 @@ Also hosts the `cloudflared` container for Cloudflare Tunnel remote access.
 
 ## Services proxied
 
-| URL | Backend | Access |
-|---|---|---|
-| `https://portainer.longie.net` | `192.168.1.6:9443` (TLS) | LAN/Tailscale |
-| `https://sonarr.longie.net` | `192.168.1.6:8989` | LAN/Tailscale |
-| `https://n8n.longie.net` | `n8n:5678` (remote-access net) | Internet — Cloudflare Tunnel + Access |
-| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN/Tailscale |
+| URL | Backend | Access | DNS record |
+|---|---|---|---|
+| `https://portainer.longie.net` | `192.168.1.6:9443` (TLS) | LAN | A → `192.168.1.6`, proxy off |
+| `https://sonarr.longie.net` | `192.168.1.6:8989` | LAN | A → `192.168.1.6`, proxy off |
+| `https://qbt.longie.net` | `192.168.1.6:8080` | LAN | A → `192.168.1.6`, proxy off |
+| `https://tautulli.longie.net` | `tautulli:8181` (proxy_net) | LAN | A → `192.168.1.6`, proxy off |
+| `https://seerr.longie.net` | `seerr:5055` (proxy_net) | LAN | A → `192.168.1.6`, proxy off |
+| `https://home.longie.net` | `homepage:3000` (proxy_net) | LAN | A → `192.168.1.6`, proxy off |
+| `https://prowlarr.longie.net` | `192.168.1.6:9696` | LAN | A → `192.168.1.6`, proxy off |
+| `https://uptime.longie.net` | `uptime-kuma:3001` (proxy_net) | LAN | A → `192.168.1.6`, proxy off |
+| `https://n8n.longie.net` | `n8n:5678` (remote-access net) | Internet — Cloudflare Tunnel + Access | A → `192.168.1.6`, proxy off |
 
 Jackett (`192.168.1.6:9117`) and Deluge (`192.168.1.6:8112`) are **not** proxied by Caddy — access directly on LAN.
 
