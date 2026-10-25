@@ -31,6 +31,7 @@ services:
       - 127.0.0.1:49153:49152     # Deluge (49152 reserved by macOS rapportd)
       - 127.0.0.1:49153:49152/udp # Deluge
       - 192.168.1.6:8112:8112     # Deluge WebUI — LAN direct only
+      - 192.168.1.6:9696:9696     # Prowlarr WebUI — LAN direct + Caddy (prowlarr.longie.net)
       - 127.0.0.1:6881:6881       # QB
       - 127.0.0.1:6881:6881/udp   # QB
       - 192.168.1.6:9117:9117     # Jackett — LAN direct only
