@@ -1,15 +1,16 @@
 # FlareSolverr
 
-Cloudflare bypass proxy used by Jackett to scrape protected torrent indexers. Routes all traffic through gluetun VPN (`network_mode: container:gluetun`). **gluetun must be running first.**
+Cloudflare bypass proxy used by Prowlarr to scrape protected torrent indexers. Routes all traffic through gluetun VPN (`network_mode: container:gluetun`). **gluetun must be running first.**
 
-Not directly accessible from the browser — Jackett calls it internally on port `8191`.
+Not directly accessible from the browser — Prowlarr calls it internally on `localhost:8191`.
 
 ## Architecture
 
-FlareSolverr shares gluetun's network namespace. Port 8191 is not exposed on the host — it is only reachable by Jackett (which also shares gluetun's network namespace).
+FlareSolverr shares gluetun's network namespace. Port 8191 is not exposed on the host — it is only reachable by other containers in the same gluetun namespace (Prowlarr, Jackett).
 
 ```
-Jackett → flaresolverr:8191 (internal, within gluetun network)
+Prowlarr → localhost:8191 (internal, within gluetun network namespace)
+Jackett  → localhost:8191 (internal, within gluetun network namespace)
 ```
 
 ## Required environment variables
@@ -18,22 +19,28 @@ None — all configuration is hardcoded in `docker-compose.yml`.
 
 ## Post-deploy configuration
 
-In Jackett → each indexer that requires Cloudflare bypass:
+### Prowlarr integration
 
-- Set **FlareSolverr API URL** to `http://localhost:8191`
+Prowlarr → Settings → Indexer Proxies → Add → FlareSolverr:
+
+| Field | Value |
+|---|---|
+| Host | `http://localhost:8191` |
+| Tags | `flaresolverr` |
+
+Then for each Cloudflare-protected indexer in Prowlarr (e.g. EZTV), add the `flaresolverr` tag to the indexer.
+
+### Jackett integration (legacy — remove once Jackett is retired)
+
+Jackett → each indexer that requires Cloudflare bypass → set **FlareSolverr API URL** to `http://localhost:8191`.
 
 ## Verify after deploy
 
-**1. gluetun running:**
-```bash
-docker ps | grep gluetun
-```
-
-**2. FlareSolverr running:**
+**1. FlareSolverr running:**
 ```bash
 docker ps | grep flaresolverr
 ```
 
-**3. Reachable from Jackett:**
+**2. Reachable from Prowlarr:**
 
-Test via Jackett — add an indexer that uses FlareSolverr and run a test search.
+Prowlarr → Settings → Indexer Proxies → FlareSolverr → Test — should show green.

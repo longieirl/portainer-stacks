@@ -27,7 +27,15 @@ Set in Portainer UI → stack → Environment variables:
 
 ## Post-deploy configuration
 
-**Allowed Hosts (required):** Sonarr will show a security warning until this is set.
+### Indexers (via Prowlarr)
+
+Sonarr does not manage indexers directly — they are synced automatically from Prowlarr.
+
+Set up in Prowlarr → Settings → Apps → Sonarr (see `stacks/prowlarr/README.md`). After sync, all Prowlarr indexers appear in Sonarr → Settings → Indexers as Torznab feeds. Do not add indexers directly to Sonarr.
+
+### Allowed Hosts (required)
+
+Sonarr will show a security warning until this is set.
 
 Settings > General > Security > Allowed Hosts:
 ```
