@@ -1,6 +1,6 @@
 # gluetun
 
-WireGuard VPN gateway. deluge, jackett, qbittorrent, prowlarr, and flaresolverr use `network_mode: container:gluetun` — gluetun must be running before those stacks start.
+WireGuard VPN gateway. deluge, qbittorrent, prowlarr, and flaresolverr use `network_mode: container:gluetun` — gluetun must be running before those stacks start.
 
 ## Architecture
 
@@ -21,7 +21,6 @@ Host LAN → 192.168.1.6:<port> → gluetun → container
 |---|---|---|
 | 8080 | qBittorrent WebUI | Homepage widget, LAN direct |
 | 8112 | Deluge WebUI | Homepage widget, LAN direct |
-| 9117 | Jackett WebUI | LAN direct (legacy) |
 | 9696 | Prowlarr WebUI | Homepage widget, Caddy (prowlarr.longie.net), Sonarr sync |
 
 ### Adding a new service to the gluetun namespace
@@ -42,7 +41,7 @@ Set `WIREGUARD_PRIVATE_KEY` in Portainer UI → stack → Environment variables.
 Dependent containers lose network access when gluetun restarts. Restart them after redeploy:
 
 ```bash
-docker restart qbittorrent deluge jackett prowlarr flaresolverr
+docker restart qbittorrent deluge prowlarr flaresolverr
 ```
 
 ## Verify after deploy

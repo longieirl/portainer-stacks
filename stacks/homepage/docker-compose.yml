@@ -122,10 +122,6 @@ configs:
                 url: http://192.168.1.6:9696
                 key: "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}"
                 fields: ["enabledIndexers", "numberOfGrabs", "numberOfFailGrabs"]
-          - Jackett:
-              href: http://192.168.1.6:9117
-              description: Torrent indexer proxy
-              icon: jackett.png
 
       - Infrastructure:
           - Portainer:
