@@ -45,3 +45,21 @@ tail -f /tmp/glances.err
 
 Configured in `stacks/homepage/docker-compose.yml` under the System group.
 Homepage reaches Glances via `http://host.docker.internal:61208`.
+
+---
+
+## Tailscale SSH check — `check-tailscale-ssh.sh`
+
+Reports whether the Tailscale SSH server is running on this node. Context: the
+"Tailworm" advisory (2026-10-25) — post-auth privilege escalation in Tailscale SSH.
+See `SECURITY.md` → Host dependency advisories.
+
+```bash
+bash scripts/check-tailscale-ssh.sh
+```
+
+- `RunSSH: false` → OK, not affected (exit 0)
+- `RunSSH: true` → warning + mitigation steps (exit 1)
+
+Run on **every** Tailscale device — exposure is per-node, not per-tailnet.
+
