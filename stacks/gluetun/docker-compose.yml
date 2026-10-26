@@ -34,8 +34,6 @@ services:
       - 192.168.1.6:9696:9696     # Prowlarr WebUI — LAN direct + Caddy (prowlarr.longie.net)
       - 127.0.0.1:6881:6881       # QB
       - 127.0.0.1:6881:6881/udp   # QB
-      - 192.168.1.6:9117:9117     # Jackett — LAN direct only
-      - 192.168.1.6:9696:9696     # Prowlarr — LAN direct only
     mem_limit: 256m
     healthcheck:
       test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
@@ -86,32 +84,6 @@ services:
       - DELUGE_LOGLEVEL=info
     volumes:
       - ${DOCKER_DATA_HOME}/deluge/config:/config
-      - ${DOCKER_SHARED_HOME}/downloads:/downloads
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETUID
-      - SETGID
-    mem_limit: 512m
-
-  jackett:
-    image: lscr.io/linuxserver/jackett:latest
-    container_name: jackett
-    network_mode: "container:gluetun"
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Dublin
-      - AUTO_UPDATE=false
-    volumes:
-      - ${DOCKER_DATA_HOME}/jackett/config:/config
       - ${DOCKER_SHARED_HOME}/downloads:/downloads
     restart: unless-stopped
     security_opt:
