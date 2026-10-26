@@ -140,6 +140,10 @@ configs:
               href: https://uptime.longie.net
               description: Uptime monitoring
               icon: uptime-kuma.png
+              widget:
+                type: uptimekuma
+                url: http://uptime-kuma:3001
+                slug: home
 
       - System:
           - CPU:
