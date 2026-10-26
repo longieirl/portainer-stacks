@@ -23,6 +23,44 @@ Include:
 
 You will receive a response within 5 business days. There is no bug bounty program.
 
+## Host dependency advisories
+
+Services here are reached over a Tailscale overlay, and the Docker host runs
+Tailscale directly. Tailscale is **not** managed by this repo or CI, so host-level
+advisories must be tracked manually — Dependabot/Scorecard/image scanning cannot see it.
+
+### Tailscale SSH — "Tailworm" (disclosed 2026-10-25, unpatched at time of writing)
+
+Post-authorization privilege-escalation and SSH-forwarding flaws in the **Tailscale SSH**
+feature. Requires (a) Tailscale SSH server running on a node, and (b) an attacker
+foothold on an already-trusted tailnet device. Not an unauthenticated-access bug.
+Vendor (Tailscale) is **not** advising disabling Tailscale SSH; the primary mitigation
+is disabling SSH forwarding.
+
+**Our posture:** this host does **not** run the Tailscale SSH server — Tailscale is used
+only as transport to Caddy, and host login is plain OS `sshd`. Verified on the Docker
+host (`192.168.1.6`):
+
+```bash
+tailscale debug prefs | grep RunSSH      # → "RunSSH": false
+```
+
+While `RunSSH: false`, this host is **not affected**.
+
+**Invariant — do not enable Tailscale SSH casually.** `tailscale up --ssh` makes the
+feature live instantly (the tailnet ACL already grants this node `cap/ssh`). Before ever
+enabling it: read the Tailscale security advisory, and if enabled, set
+`TS_SSH_DISABLE_FORWARDING=1` in the `tailscaled` environment and scope the ssh ACL to
+named source→destination pairs.
+
+**Per-node check** (run on every Tailscale device, not just this host — exposure is per-node):
+
+```bash
+bash scripts/check-tailscale-ssh.sh
+```
+
+Advisory: https://tailscale.com/security-bulletins (watch for the Tailworm advisory + patch)
+
 ## Supported versions
 
 Only the `main` branch is actively maintained.
@@ -44,7 +82,6 @@ All services run on a private LAN. The threat model is credential interception b
 | **n8n** | HTTPS via Caddy reverse proxy | Stores OAuth tokens and API keys; `N8N_SECURE_COOKIE=true` requires HTTPS |
 | **Sonarr** | HTTPS via Caddy reverse proxy | No native TLS; co-located with n8n behind the same Caddy instance — zero extra overhead |
 | **qBittorrent** | HTTPS via Caddy reverse proxy | Uses `network_mode: container:gluetun` — no independent network; Caddy reaches it via gluetun on `proxy_net`; port 8080 removed from host |
-| **Jackett** | Plain HTTP, accepted risk | No native TLS, no proxy; API key only used by internal containers; low exposure on trusted LAN |
 | **Deluge** | Plain HTTP, accepted risk | No native TLS; WebUI accessed infrequently; acceptable on trusted LAN |
 | **FlareSolverr** | Plain HTTP, accepted risk | Container-to-container only; not user-facing; TLS adds no practical benefit |
 | **Portainer** | HTTPS by default (port 9443) | Ships with self-signed cert out of the box |
