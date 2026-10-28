@@ -81,6 +81,28 @@ docker compose -f stacks/caddy/docker-compose.yml up -d --pull always
 
 **Why `configs: content:` is used:** It avoids requiring the Caddyfile to exist as a bind-mounted file on the host, keeping the stack fully self-contained in git. Portainer GitOps bind mounts resolve relative to the `docker compose` runtime path (not the Portainer internal git cache), so a bind mount would require the repo to be cloned on the host anyway.
 
+## Picking up Caddyfile changes immediately
+
+Adding or editing a `*.longie.net` block in git does **not** take effect until the
+24h GitOps poll re-renders the stack. Until then the running Caddy serves the old
+config — a brand-new hostname returns `ERR_CONNECTION_CLOSED` (Caddy drops the TLS
+handshake because it has no site block or cert for it).
+
+After the stack has re-rendered (or to apply a mounted-config change now), reload Caddy
+without downtime:
+
+```bash
+docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+If the running Caddyfile itself is stale (not yet re-rendered by GitOps), reload alone
+won't help — confirm what's actually mounted, then force-redeploy via the host-clone
+workaround above:
+
+```bash
+docker exec caddy sh -c 'grep -c <hostname> /etc/caddy/Caddyfile'   # 0 = stale, needs redeploy
+```
+
 ## Rate limiting
 
 Rate limiting is enforced at the Cloudflare WAF layer — not in Caddy. Blocks brute-force attempts at the edge before traffic reaches the tunnel.
