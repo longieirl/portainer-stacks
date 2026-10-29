@@ -124,21 +124,33 @@ configs:
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy 192.168.1.6:8989
+          reverse_proxy sonarr:8989
       }
 
       qbt.longie.net {
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy 192.168.1.6:8080
+          # gluetun not on proxy_net; reach via host-published port.
+          # keepalive off: avoids reusing stale pooled conns after
+          # nightly container recreate (else needs manual caddy restart).
+          reverse_proxy 192.168.1.6:8080 {
+              transport http {
+                  keepalive off
+              }
+          }
       }
 
       prowlarr.longie.net {
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy 192.168.1.6:9696
+          # Same gluetun host-NAT case as qbt above.
+          reverse_proxy 192.168.1.6:9696 {
+              transport http {
+                  keepalive off
+              }
+          }
       }
 
       tautulli.longie.net {
