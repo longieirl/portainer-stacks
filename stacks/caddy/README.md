@@ -145,6 +145,22 @@ done
 
 Expected: first 5 lines `302` (Portainer redirects unauthenticated requests), subsequent lines `429 Too Many Requests`.
 
+Or run the script to hit all three login endpoints at once:
+
+```bash
+bash scripts/test-waf-ratelimit.sh
+```
+
+## Verifying Cloudflare Access policies
+
+Confirm CF Access gates every protected hostname (rejects unauthenticated requests). **Run from outside the LAN** — on-LAN traffic bypasses CF Access by design:
+
+```bash
+bash scripts/verify-cf-access.sh
+```
+
+Also verify manually in Cloudflare Zero Trust → Access → Applications that each hostname has an active policy scoped to your account.
+
 ## Adding more services via tunnel
 
 1. Create Cloudflare Access application for the new hostname — **do this first**
