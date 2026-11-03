@@ -104,7 +104,10 @@ configs:
       }
 
       http://n8n.longie.net {
-          reverse_proxy n8n:5678
+          reverse_proxy n8n:5678 {
+              lb_try_duration 90s
+              lb_try_interval 2s
+          }
       }
 
       portainer.longie.net {
@@ -124,7 +127,10 @@ configs:
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy sonarr:8989
+          reverse_proxy sonarr:8989 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
       }
 
       qbt.longie.net {
@@ -157,32 +163,47 @@ configs:
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy tautulli:8181
+          reverse_proxy tautulli:8181 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
       }
 
       seerr.longie.net {
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy seerr:5055
+          reverse_proxy seerr:5055 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
       }
 
       http://home.longie.net {
-          reverse_proxy homepage:3000
+          reverse_proxy homepage:3000 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
       }
 
       home.longie.net {
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy homepage:3000
+          reverse_proxy homepage:3000 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
       }
 
       uptime.longie.net {
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy uptime-kuma:3001
+          reverse_proxy uptime-kuma:3001 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
       }
 
       # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
@@ -191,7 +212,10 @@ configs:
           import block_scanners
           import security_headers
           import body_limit
-          reverse_proxy n8n:5678
+          reverse_proxy n8n:5678 {
+              lb_try_duration 90s
+              lb_try_interval 2s
+          }
       }
 
     # yamllint enable rule:line-length
