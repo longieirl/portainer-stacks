@@ -148,6 +148,59 @@ Caddy handles TLS cert issuance automatically via DNS-01 challenge using `CLOUDF
 
 ---
 
+## macOS host fix: Caddy not accepting external traffic after reboot
+
+**Symptom:** After a macOS reboot, all `*.longie.net` domains are inaccessible. Services work when hitting container IPs directly, and container-to-container traffic works. `curl -v https://sonarr.longie.net` shows TLS reset on `192.168.1.6:443` but succeeds on `127.0.0.1:443`. Manually restarting the Caddy container fixes it.
+
+**Root cause:** Docker Desktop 4.98.0 (released ~Nov 2026) changed the port forwarding architecture. A one-shot privileged daemon (`com.docker.socket`, `RunAtLoad=true`) sets up the port proxy infrastructure at boot, but runs before Docker Desktop's Linux VM is ready. The proxy ends up accepting TCP on all interfaces but only forwarding connections from `127.0.0.1`. Restarting Caddy after Docker is fully initialized re-registers the port mapping correctly.
+
+**Diagnosis:**
+```bash
+# Confirm loopback works but LAN doesn't
+curl -v https://sonarr.longie.net --connect-to sonarr.longie.net:443:127.0.0.1:443 2>&1 | head -10  # succeeds
+curl -v https://sonarr.longie.net --connect-to sonarr.longie.net:443:192.168.1.6:443 2>&1 | head -10  # TLS reset
+
+# Confirm com.docker.socket is a one-shot daemon
+sudo launchctl print system/com.docker.socket 2>&1 | grep -E "state|RunAtLoad"
+```
+
+**Fix:** Install a macOS LaunchAgent that restarts Caddy after Docker is fully ready:
+
+```bash
+cat > ~/Library/LaunchAgents/net.longie.docker-caddy-fix.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>net.longie.docker-caddy-fix</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>until /usr/local/bin/docker info >/dev/null 2>/dev/null; do sleep 2; done; sleep 10; /usr/local/bin/docker restart caddy</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/tmp/docker-caddy-fix.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/docker-caddy-fix.log</string>
+</dict>
+</plist>
+EOF
+
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/net.longie.docker-caddy-fix.plist
+```
+
+**Verify:** After reboot, `cat /tmp/docker-caddy-fix.log` should show `caddy`. If empty after 2 minutes, re-run the `launchctl bootstrap` command.
+
+> This is a Docker Desktop regression — file at https://github.com/docker/for-mac/issues if the issue persists across Docker Desktop versions.
+
+---
+
 ## Secrets
 
 Never commit `.env` files. Real values live in Portainer's Environment Variables UI only.
