@@ -1,0 +1,116 @@
+# homeassistant stack
+#
+# FEATURE FLAG: COMPOSE_PROFILES (set in Portainer stack env)
+#   unset / empty  -> Phase 1: Home Assistant only. Controls existing
+#                     SmartLife/Tuya Zigbee devices + TRVs via the cloud "Tuya"
+#                     integration (added in the HA UI).
+#   = zigbee       -> Phase 2: also starts mosquitto + zigbee2mqtt for local
+#                     Zigbee via the SMLIGHT SLZB-06 coordinator over TCP.
+#
+# Verified: Portainer 2.45.x honours COMPOSE_PROFILES. Use the SINGLE value
+# `zigbee` — comma-separated profile lists are truncated by a known Portainer
+# bug (portainer/portainer#13033). Not needed here.
+#
+# Phase 2 also requires SLZB06_HOST and Z2M_AUTH_TOKEN (see .env.example).
+# Full rationale + migration steps: docs/research/research-homeassistant-zigbee.md
+
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Dublin
+    volumes:
+      - ${DOCKER_DATA_HOME}/homeassistant:/config
+    ports:
+      # Direct LAN access + HA companion app. Caddy also reaches it by
+      # container name on proxy_net.
+      - "192.168.1.6:8123:8123"
+    networks:
+      - proxy_net
+      - smarthome_net
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2g
+    # HA Container runs its own s6 init as root; aggressive cap_drop can break
+    # boot, so it is intentionally omitted here.
+    # :stable is pinned-by-intent + Watchtower-excluded (HA ships monthly
+    # breaking changes). Upgrade deliberately via Portainer "Pull and redeploy".
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # --- Phase 2 (COMPOSE_PROFILES=zigbee) ---
+
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    profiles: ["zigbee"]
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_DATA_HOME}/mosquitto/data:/mosquitto/data
+      - ${DOCKER_DATA_HOME}/mosquitto/log:/mosquitto/log
+    configs:
+      - source: mosquitto_conf
+        target: /mosquitto/config/mosquitto.conf
+    networks:
+      - smarthome_net
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 128m
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  zigbee2mqtt:
+    image: ghcr.io/koenkk/zigbee2mqtt:latest
+    container_name: zigbee2mqtt
+    profiles: ["zigbee"]
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    environment:
+      - TZ=Europe/Dublin
+      # Config via env (ZIGBEE2MQTT_CONFIG_*) keeps host IP + secrets out of git.
+      - ZIGBEE2MQTT_CONFIG_MQTT_SERVER=mqtt://mosquitto:1883
+      # SLZB-06 network coordinator over TCP (TI CC2652P = zstack adapter).
+      - ZIGBEE2MQTT_CONFIG_SERIAL_PORT=tcp://${SLZB06_HOST}:6638
+      - ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER=zstack
+      # Auto-discovery into Home Assistant via MQTT.
+      - ZIGBEE2MQTT_CONFIG_HOMEASSISTANT_ENABLED=true
+      - ZIGBEE2MQTT_CONFIG_FRONTEND_ENABLED=true
+      - ZIGBEE2MQTT_CONFIG_FRONTEND_PORT=8080
+      # Frontend has NO auth by default — token required since it is proxied.
+      - ZIGBEE2MQTT_CONFIG_FRONTEND_AUTH_TOKEN=${Z2M_AUTH_TOKEN}
+    volumes:
+      # Holds the Zigbee network key + device list — back this up.
+      - ${DOCKER_DATA_HOME}/zigbee2mqtt:/app/data
+    networks:
+      - proxy_net
+      - smarthome_net
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    # :latest but Watchtower-excluded: Z2M ships DB migrations and touches the
+    # live Zigbee network — upgrade deliberately via "Pull and redeploy".
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+configs:
+  mosquitto_conf:
+    content: |
+      listener 1883
+      # Broker lives only on the internal smarthome_net bridge (never published
+      # to LAN/host), so anonymous access is acceptable. Add auth if exposed.
+      allow_anonymous true
+      persistence true
+      persistence_location /mosquitto/data/
+
+networks:
+  proxy_net:
+    name: proxy_net
+    external: true
+  smarthome_net:
+    name: smarthome_net
+    driver: bridge

@@ -206,6 +206,31 @@ configs:
           }
       }
 
+      # If the HA frontend misbehaves, drop `import security_headers` here —
+      # HA sets its own headers and its CSP can conflict. Caddy auto-handles
+      # HA websockets.
+      homeassistant.longie.net {
+          import block_scanners
+          import security_headers
+          import body_limit
+          reverse_proxy homeassistant:8123 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
+      }
+
+      # Phase 2 only — zigbee2mqtt frontend. 502s until COMPOSE_PROFILES=zigbee
+      # starts the service. Auth enforced by Z2M_AUTH_TOKEN (LAN-only route).
+      z2m.longie.net {
+          import block_scanners
+          import security_headers
+          import body_limit
+          reverse_proxy zigbee2mqtt:8080 {
+              lb_try_duration 30s
+              lb_try_interval 2s
+          }
+      }
+
       # NOTE: Auth enforced by Cloudflare Access at edge. Caddy only routes.
       # Webhook bypass paths are configured in Access policies, not here.
       n8n.longie.net {
