@@ -112,21 +112,20 @@ Set in Portainer UI → stack → Environment variables.
 
 1. Deploy the stack (no secrets needed). Open `http://192.168.1.6:8123`, create the
    owner account.
-2. **Reverse-proxy config** (else Caddy returns `400 Bad Request`). HA writes
-   `configuration.yaml` on first boot — add:
-   ```yaml
-   http:
-     use_x_forwarded_for: true
-     trusted_proxies:
-       - 172.16.0.0/12   # docker bridge range (proxy_net)
-       - 192.168.1.0/24  # LAN
-   ```
-   Edit at `${DOCKER_DATA_HOME}/homeassistant/configuration.yaml`, then restart HA.
-   (HA *Container* has no add-ons, so there's no in-app File Editor.)
+2. **Trust the Caddy reverse proxy** (else external requests return `400 Bad
+   Request`). HA 2026.8+ configures this in the **UI, not YAML**: Settings → System
+   → **Network** → **HTTP server** → turn on **Trust X-Forwarded-For** and add
+   **Trusted proxies** `172.16.0.0/12` (docker / `proxy_net`) and `192.168.1.0/24`
+   (LAN). Save, then restart HA.
+   > On older HA this was an `http:` block in `configuration.yaml`. After the 2026.8
+   > migration that block is **ignored** (raises a repair notice) — use the UI and
+   > remove any `http:` block from `configuration.yaml`.
 3. **Tuya integration:** Settings → Devices & Services → Add Integration → **Tuya**.
-   Recent versions log in with your SmartLife account; some still require a free
-   Tuya IoT developer cloud project (follow the in-flow link if prompted). Devices
-   and TRVs import as `climate` / `sensor` entities.
+   No developer account needed (HA 2024.2+). In the Smart Life (or Tuya Smart) app:
+   **Me → ⚙️ → Account and Security → User Code**; enter it in HA, then scan the QR
+   HA shows using the app (**+ / Add Device → Scan**). Devices and TRVs import as
+   `climate` / `sensor` entities. Added a device later? Add it in the app, then
+   reload the Tuya integration in HA.
 
 ## Phase 2 setup (when the coordinator arrives)
 
