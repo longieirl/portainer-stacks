@@ -141,6 +141,16 @@ configs:
                 url: http://uptime-kuma:3001
                 slug: home
 
+      - Home Automation:
+          - Home Assistant:
+              href: https://homeassistant.longie.net
+              description: Smart home + TRVs
+              icon: home-assistant.png
+          - Zigbee2MQTT:
+              href: https://z2m.longie.net
+              description: Zigbee coordinator (Phase 2)
+              icon: zigbee2mqtt.png
+
       - System:
           - CPU:
               icon: glances.png
@@ -192,6 +202,9 @@ configs:
           style: row
         Infrastructure:
           columns: 3
+          style: row
+        Home Automation:
+          columns: 2
           style: row
         System:
           columns: 4
