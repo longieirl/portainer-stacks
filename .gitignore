@@ -10,10 +10,16 @@
 Thumbs.db
 *conflicted copy*
 
-docs/superpowers/
-docs/local/
-docs/handover-*.md
-docs/research-*.md
-docs/research/
-docs/system-design*.md
+# Local docs / research notes — never committed
+docs/
 stacks/homepage/config/
+
+# AI Coding Agents
+.claude
+.claude/worktrees
+.claude/handover.md
+.claude/settings.local.json
+.claude/*.lock
+.claude/cache/
+CLAUDE.local.md
+.playwright-mcp/
